@@ -100,10 +100,10 @@ too_much(Owner, B) :-
 
 +available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-  !go_to(storekeeper, delivery); !update_prices; .wait(5000); ?min_price(beer, P, S); .send(S, achieve, order(beer,3)).
 
-+bin(full) <- !take_out_trash.
-+where(trash, A, B): carrying_trash(true) <- .wait(carrying_trash(false)); !clean_trash.
-+where(trash, A, B): carrying_trash(false) <-  !clean_trash. 
--where(trash, _, _) <- .drop_intention({ !go_to(cleaner,trash) }).
++bin(full): busy(cleaner) <- .wait({-busy(cleaner)}); +busy(cleaner); !take_out_trash; -busy(cleaner).
++bin(full): not busy(cleaner) <- +busy(cleaner); !take_out_trash; -busy(cleaner).
++where(trash, A, B): busy(cleaner) <- .wait({ -busy(cleaner) }); +busy(cleaner); !clean_trash; -busy(cleaner).
++where(trash, A, B): not busy(cleaner) <- +busy(cleaner); !clean_trash; -busy(cleaner).
 
 +!take_out_trash <- !go_to(cleaner, bin); empty(bin); !go_to(cleaner, delivery); drop(bin); !go_to(cleaner, base_cleaner). 
 
