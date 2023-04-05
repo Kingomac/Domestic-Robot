@@ -166,10 +166,12 @@ public class HouseModel extends GridWorldModel {
 
     boolean getBeer() {
         // if (fridgeOpen && availableBeers > 0 && !carryingBeer) {
-        availableBeers--;
-        carryingBeer = true;
-        if (view != null)
-            view.update(Places.FRIDGE.x, Places.FRIDGE.y);
+        if (availableBeers > 0) {
+            availableBeers--;
+            carryingBeer = true;
+            if (view != null)
+                view.update(Places.FRIDGE.x, Places.FRIDGE.y);
+        }
         return true;
         /*
          * } else {

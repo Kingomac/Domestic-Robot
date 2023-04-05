@@ -3,8 +3,9 @@
 // my owner should not consume more than 10 beers a day :-)
 limit(beer,5).
 min_price(beer, 100000000, none).
+free(cleaner).
 
-money(50).
+money(0). 
 
 too_much(Owner, B) :-
    .date(YY,MM,DD) &
@@ -14,6 +15,9 @@ too_much(Owner, B) :-
 
 
 /* Plans */
+!request_money.
++!request_money <- .send(owner, achieve, ask_money(robot)); .wait({ +money(_) }); .send(owner_musk, achieve, ask_money(robot)). 
++!save_money(Nuevo) <- ?money(Actual); .print("Dinero actual: ", Actual, " que sumado da ", Actual + Nuevo); -+money(Actual + Nuevo).
 
 +price(_,_) : true <- for (price(beer, P)[source(S)]) {
 	?min_price(beer, MIN, _);
@@ -98,12 +102,14 @@ too_much(Owner, B) :-
 	close(fridge);
 	!go_to(storekeeper, base_storekeeper).
 
-+available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-  !go_to(storekeeper, delivery); !update_prices; .wait(5000); ?min_price(beer, P, S); .send(S, achieve, order(beer,3)).
++available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-
+	!go_to(storekeeper, delivery);
+	!update_prices; .wait(5000); ?min_price(beer, P, S);
+	?money(DineroActual); if(DineroActual <=  P) { !request_money };
+	.send(S, achieve, order(beer,3)).
 
-+bin(full): busy(cleaner) <- .wait({-busy(cleaner)}); +busy(cleaner); !take_out_trash; -busy(cleaner).
-+bin(full): not busy(cleaner) <- +busy(cleaner); !take_out_trash; -busy(cleaner).
-+where(trash, A, B): busy(cleaner) <- .wait({ -busy(cleaner) }); +busy(cleaner); !clean_trash; -busy(cleaner).
-+where(trash, A, B): not busy(cleaner) <- +busy(cleaner); !clean_trash; -busy(cleaner).
++bin(full) <- .wait(free(cleaner)); -free(cleaner); !take_out_trash; +free(cleaner).
++where(trash, A, B) <- .wait(free(cleaner)); -free(cleaner); !clean_trash; +free(cleaner).
 
 +!take_out_trash <- !go_to(cleaner, bin); empty(bin); !go_to(cleaner, delivery); drop(bin); !go_to(cleaner, base_cleaner). 
 
