@@ -1,0 +1,18 @@
+/* Jason Project
+
+   See Prometheus specification in doc folder
+
+*/
+
+MAS domestic_robot {
+    environment: HouseEnv(gui) // use "nogui" as parameter to not show the GUI
+    agents: robot;
+            owner;
+			owner_musk;
+            supermarket_mercadona supermarket.asl [beliefs="name(mercadona)"]; // , price(beer, 10), stock(beer, 5), money(100000)
+			supermarket_lidl supermarket.asl [beliefs="name(lidl)"]; // , price(beer, 5), stock(beer, 15), money(60000)
+			supermarket_gadis supermarket.asl [beliefs="name(gadis)"];
+			supermarket_froiz supermarket.asl [beliefs="name(froiz)"];
+			supermarket_eroski supermarket.asl [beliefs="name(eroski)"];
+			supermarket_dia supermarket.asl [beliefs="name(dia)"];
+}
