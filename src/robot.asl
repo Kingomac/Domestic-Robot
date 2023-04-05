@@ -101,8 +101,8 @@ too_much(Owner, B) :-
 +available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-  !go_to(storekeeper, delivery); !update_prices; .wait(5000); ?min_price(beer, P, S); .send(S, achieve, order(beer,3)).
 
 +bin(full) <- !take_out_trash.
-+where(trash, A, B): not .intend(take_out_trash) & carrying_trash(true) <- .wait(carrying_trash(false)); !clean_trash.
-+where(trash, A, B): not .intend(take_out_trash) & carrying_trash(false) <- !clean_trash.
++where(trash, A, B): carrying_trash(true) <- .wait(carrying_trash(false)); !clean_trash.
++where(trash, A, B): carrying_trash(false) <-  !clean_trash. 
 -where(trash, _, _) <- .drop_intention({ !go_to(cleaner,trash) }).
 
 +!take_out_trash <- !go_to(cleaner, bin); empty(bin); !go_to(cleaner, delivery); drop(bin); !go_to(cleaner, base_cleaner). 
@@ -112,7 +112,7 @@ too_much(Owner, B) :-
 -!clean_trash <- .wait(3000); !clean_trash.
 
 
-+!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait({ +where(Sitio, _, _) }); !go_to(Tipo, Sitio).
++!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait(where(Sitio, _, _)); !go_to(Tipo, Sitio).
 +!go_to(Tipo, Sitio) : at(Tipo, Sitio) <- true.
 +!go_to(Tipo, Sitio) : not at(Tipo, Sitio) & where(Sitio, DestX,DestY) <- move_robot(Tipo, DestX, DestY); !go_to(Tipo, Sitio).
 -!go_to(Tipo, Sitio) <- .print(Tipo, " can't !go_to ", Sitio); .wait(3000); !go_to(Tipo, Sitio).
