@@ -1,7 +1,10 @@
+money(100).
 /* Initial goals */
 
 !get(beer).   // initial goal: get a beer
 !check_bored. // initial goal: verify whether I am getting bored
+
++!ask_money(Ag) : money(X) & X > 0 <- .send(Ag, achieve, save_money(X * 0.5)); -+money(X * 0.5).
 
 +!get(beer) : true
    <- .send(robot, achieve, bring(owner_musk,beer)).
