@@ -227,14 +227,14 @@ public class HouseModel extends GridWorldModel {
     }
 
     boolean saveBeer() {
-        if (carryingDelivery) {
-            availableBeers += 3; // Deja 2 y se queda 1 (en total 3)
-            carryingDelivery = false;
-            if (view != null)
-                view.update(Places.DELIVERY.x, Places.DELIVERY.y);
-            return true;
-        }
-        return false;
+        // if (carryingDelivery) {
+        availableBeers += 3; // Deja 2 y se queda 1 (en total 3)
+        carryingDelivery = false;
+        if (view != null)
+            view.update(Places.DELIVERY.x, Places.DELIVERY.y);
+        return true;
+        // }
+        // return false;
     }
 
     boolean sipBeer() {
