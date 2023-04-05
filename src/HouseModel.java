@@ -339,12 +339,12 @@ public class HouseModel extends GridWorldModel {
 
     boolean emptyBin() {
         binCount = 0;
-        carryingBeer = true;
+        carryingTrash = true;
         return true;
     }
 
     boolean dropBin() {
-        carryingBeer = false;
+        carryingTrash = false;
         return true;
     }
 

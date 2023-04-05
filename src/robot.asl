@@ -26,9 +26,34 @@ too_much(Owner, B) :-
 		-price(beer, _)[source(S)];
 		.send(S, askOne, price(beer, X));
 	}.
-	
-+!bring(Owner, beer) : .intend(bring(A,_)) & A \== Owner <- .wait(3000); !bring(Owner, beer). 
 
++!bring(Owner, beer) : .intend(give(A,_)) & A \== Owner <- .wait(3000); !bring(Owner, beer).
++!bring(Owner, beer) : true <- !give(Owner, beer).
+
++!give(Owner,beer)
+   :  not too_much(Owner,beer)
+   <- !go_to(robot,fridge);
+      open(fridge);
+      !get_when_available(beer);
+      close(fridge);
+      !go_to(robot,Owner);
+      hand_in(Owner,beer);
+      ?has(Owner,beer);
+      // remember that another beer has been consumed
+      .date(YY,MM,DD); .time(HH,NN,SS);
+      +consumed(Owner,YY,MM,DD,HH,NN,SS,beer).
+	  
++!give(Owner,beer)
+   :  too_much(Owner,beer) & limit(beer,L)
+   <- .concat("The Department of Health does not allow me to give ", Owner, " more than ", L,
+              " beers a day! I am very sorry about that!",M);
+      .send(Owner,tell,msg(M)).
+	  
+-!give(_,_)
+   :  true
+   <- .current_intention(I);
+      .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
+/*
 +!bring(Owner,beer)
    :  not too_much(Owner,beer)
    <- !go_to(robot,fridge);
@@ -41,6 +66,13 @@ too_much(Owner, B) :-
       // remember that another beer has been consumed
       .date(YY,MM,DD); .time(HH,NN,SS);
       +consumed(Owner,YY,MM,DD,HH,NN,SS,beer).
+	  
++!bring(Owner,beer)
+   :  too_much(Owner,beer) & limit(beer,L)
+   <- .concat("The Department of Health does not allow me to give ", Owner, " more than ", L,
+              " beers a day! I am very sorry about that!",M);
+      .send(Owner,tell,msg(M)).
+*/
 
 +!get_when_available(beer) : available(fridge, beer) <- .wait(100); open(fridge); get(beer).
 +!get_when_available(beer) : not available(fridge, beer) <- .wait({ +available(fridge,beer) }); !get_when_available(beer). 
@@ -48,12 +80,6 @@ too_much(Owner, B) :-
 /*+!bring(owner,beer)
    :  not available(beer,fridge)
    <- .print("Se acabaron las cervezas"); .wait({+available(beer, frige)}); !bring(owner,beer) . // go to fridge and wait there.*/
-
-+!bring(Owner,beer)
-   :  too_much(Owner,beer) & limit(beer,L)
-   <- .concat("The Department of Health does not allow me to give ", Owner, " more than ", L,
-              " beers a day! I am very sorry about that!",M);
-      .send(Owner,tell,msg(M)).
 
 -!bring(_,_)
    :  true
@@ -74,17 +100,19 @@ too_much(Owner, B) :-
 
 +available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-  !go_to(storekeeper, delivery); !update_prices; .wait(5000); ?min_price(beer, P, S); .send(S, achieve, order(beer,3)).
 
-+bin(full) <- !go_to(cleaner, bin); empty(bin); !go_to(cleaner, delivery); drop(bin); !go_to(cleaner, base_cleaner).
-+where(trash, A, B): not bin(full) & carrying_trash(true) <- .wait(carrying_trash(false)); !clean_trash.
-+where(trash, A, B): not bin(full) & carrying_trash(false) <- !clean_trash.
--where(trash, _, _) <- .drop_intention({ !go_to(cleaner,trash) }).
++bin(full): busy(cleaner) <- .wait({-busy(cleaner)}); +busy(cleaner); !take_out_trash; -busy(cleaner).
++bin(full): not busy(cleaner) <- +busy(cleaner); !take_out_trash; -busy(cleaner).
++where(trash, A, B): busy(cleaner) <- .wait({ -busy(cleaner) }); +busy(cleaner); !clean_trash; -busy(cleaner).
++where(trash, A, B): not busy(cleaner) <- +busy(cleaner); !clean_trash; -busy(cleaner).
+
++!take_out_trash <- !go_to(cleaner, bin); empty(bin); !go_to(cleaner, delivery); drop(bin); !go_to(cleaner, base_cleaner). 
 
 +!clean_trash : not where(trash, _, _) <- true.
 +!clean_trash : not bin(full) <- !go_to(cleaner, trash); take(trash); !go_to(cleaner, bin); drop(trash).
 -!clean_trash <- .wait(3000); !clean_trash.
 
 
-+!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait({ +where(Sitio, _, _) }); !go_to(Tipo, Sitio).
++!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait(where(Sitio, _, _)); !go_to(Tipo, Sitio).
 +!go_to(Tipo, Sitio) : at(Tipo, Sitio) <- true.
 +!go_to(Tipo, Sitio) : not at(Tipo, Sitio) & where(Sitio, DestX,DestY) <- move_robot(Tipo, DestX, DestY); !go_to(Tipo, Sitio).
 -!go_to(Tipo, Sitio) <- .print(Tipo, " can't !go_to ", Sitio); .wait(3000); !go_to(Tipo, Sitio).
