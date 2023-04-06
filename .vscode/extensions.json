@@ -1,6 +1,7 @@
 {
   "recommendations": [
     "tkampik.code-mas2j",
-    "vscjava.vscode-java-pack"
+    "vscjava.vscode-java-pack",
+    "madhavd1.javadoc-tools"
   ]
 }

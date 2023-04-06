@@ -2,10 +2,10 @@
 
 // my owner should not consume more than 10 beers a day :-)
 limit(beer,5).
-min_price(beer, 100000000, none).
-free(cleaner).
+min_price(beer, 100000000, none). // precio mínimo inicial
+free(cleaner). // el cleaner no está ocupado
 
-money(0). 
+money(0). // el robot no tiene dinero
 
 too_much(Owner, B) :-
    .date(YY,MM,DD) &
@@ -15,10 +15,13 @@ too_much(Owner, B) :-
 
 
 /* Plans */
+
+/** Le pide dinero a los owners **/
 !request_money.
 +!request_money <- .send(owner, achieve, ask_money(robot)); .wait({ +money(_) }); .send(owner_musk, achieve, ask_money(robot)). 
 +!save_money(Nuevo) <- ?money(Actual); .print("Dinero actual: ", Actual, " que sumado da ", Actual + Nuevo); -+money(Actual + Nuevo).
 
+/** Cuando un supermercado le comunique el precio de la cerveza que actualice el mínimo **/
 +price(_,_) : true <- for (price(beer, P)[source(S)]) {
 	?min_price(beer, MIN, _);
 	if (P < MIN){
@@ -26,14 +29,22 @@ too_much(Owner, B) :-
 	}
 }.
 
+/** El robot pregunta los precios a los supermercados que le comunicaron su precio al inicio **/
 +!update_prices : true <- for (price(beer, P)[source(S)]) {
 		-price(beer, _)[source(S)];
 		.send(S, askOne, price(beer, X));
 	}.
 
+/** Si el robot tiene la intención de llevarle la cerveza a un owner espera a 
+terminar para llevarle cerveza a otro **/ 
 +!bring(Owner, beer) : .intend(give(A,_)) & A \== Owner <- .wait(3000); !bring(Owner, beer).
 +!bring(Owner, beer) : true <- !give(Owner, beer).
+-!bring(_,_)
+   :  true
+   <- .current_intention(I);
+      .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
 
+/** Acción de coger y llevarle al owner correspondiente la cerveza **/
 +!give(Owner,beer)
    :  not too_much(Owner,beer)
    <- !go_to(robot,fridge);
@@ -57,39 +68,12 @@ too_much(Owner, B) :-
    :  true
    <- .current_intention(I);
       .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
-/*
-+!bring(Owner,beer)
-   :  not too_much(Owner,beer)
-   <- !go_to(robot,fridge);
-      open(fridge);
-      !get_when_available(beer);
-      close(fridge);
-      !go_to(robot,Owner);
-      hand_in(Owner,beer);
-      ?has(Owner,beer);
-      // remember that another beer has been consumed
-      .date(YY,MM,DD); .time(HH,NN,SS);
-      +consumed(Owner,YY,MM,DD,HH,NN,SS,beer).
 	  
-+!bring(Owner,beer)
-   :  too_much(Owner,beer) & limit(beer,L)
-   <- .concat("The Department of Health does not allow me to give ", Owner, " more than ", L,
-              " beers a day! I am very sorry about that!",M);
-      .send(Owner,tell,msg(M)).
-*/
-
+/** Si no hay cerveza en la nevera se queda esperando a que haya **/
 +!get_when_available(beer) : available(fridge, beer) <- .wait(100); open(fridge); get(beer).
 +!get_when_available(beer) : not available(fridge, beer) <- .wait({ +available(fridge,beer) }); !get_when_available(beer). 
 
-/*+!bring(owner,beer)
-   :  not available(beer,fridge)
-   <- .print("Se acabaron las cervezas"); .wait({+available(beer, frige)}); !bring(owner,beer) . // go to fridge and wait there.*/
-
--!bring(_,_)
-   :  true
-   <- .current_intention(I);
-      .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
-
+/** Cuando llegue el pedido el storekeeper recoge el pedido y hace el pago **/
 +delivered(beer,Qtd,OrderId): min_price(beer, P, S) & money(M) & M > P
   <- get(delivery);
   	.concat("Pedido recibido con éxito: beer(", OrderId, "), ", Qtd, " unidades e importe ", P, " robux", Mensaje);
@@ -102,12 +86,14 @@ too_much(Owner, B) :-
 	close(fridge);
 	!go_to(storekeeper, base_storekeeper).
 
+/** Si hay menos de 2 cervezas se hace un pedido **/
 +available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-
 	!go_to(storekeeper, delivery);
 	!update_prices; .wait(5000); ?min_price(beer, P, S);
 	?money(DineroActual); if(DineroActual <=  P) { !request_money };
 	.send(S, achieve, order(beer,3)).
 
+/** Código cleaner. Si no está ocupado vacía la papelera o recoge basura si hay **/
 +bin(full) <- .wait(free(cleaner)); -free(cleaner); !take_out_trash; +free(cleaner).
 +where(trash, A, B) <- .wait(free(cleaner)); -free(cleaner); !clean_trash; +free(cleaner).
 
@@ -117,7 +103,7 @@ too_much(Owner, B) :-
 +!clean_trash : not bin(full) <- !go_to(cleaner, trash); take(trash); !go_to(cleaner, bin); drop(trash).
 -!clean_trash <- .wait(3000); !clean_trash.
 
-
+/** Movimiento simple en diagonal **/
 +!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait(where(Sitio, _, _)); !go_to(Tipo, Sitio).
 +!go_to(Tipo, Sitio) : at(Tipo, Sitio) <- true.
 +!go_to(Tipo, Sitio) : not at(Tipo, Sitio) & where(Sitio, DestX,DestY) <- move_robot(Tipo, DestX, DestY); !go_to(Tipo, Sitio).

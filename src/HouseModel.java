@@ -3,9 +3,10 @@ import java.util.List;
 
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
-import jason.stdlib.map.get;
-import jason.stdlib.map.remove;
 
+/*
+ * Identificación de los distintos robots
+ */
 enum SpecializedRobots {
     ROBOT(0),
     CLEANER(1),
@@ -22,12 +23,14 @@ enum SpecializedRobots {
     }
 }
 
+/*
+ * Identificación de los lugares fijos del grid
+ */
 enum Places {
     FRIDGE(new Location(0, 0), HouseModel.FRIDGE),
     OWNER(new Location(HouseModel.GSize - 1, HouseModel.GSize - 1), HouseModel.OWNER),
     OWNER_MUSK(new Location(HouseModel.GSize / 2, 0), HouseModel.OWNER_MUSK),
     BIN(new Location(HouseModel.GSize - 1, 0), HouseModel.BIN),
-    // TRASH(new Location(-1, -1), HouseModel.TRASH),
     DELIVERY(new Location(0, HouseModel.GSize - 1), HouseModel.DELIVERY),
     BASE_ROBOT(new Location(HouseModel.GSize / 2, HouseModel.GSize / 2), -1, 0),
     BASE_CLEANER(new Location(HouseModel.GSize / 2 - 1, HouseModel.GSize - 1), -1, 0),
@@ -63,12 +66,23 @@ enum Places {
         this.minDist = minDist;
     }
 
+    /**
+     * Cambia la localización actualizando los parámetros x, y y location
+     * 
+     * @param loc nueva localización
+     */
     public void setLocation(Location loc) {
         location = loc;
         x = loc.x;
         y = loc.y;
     }
 
+    /**
+     * Cambia la localización actualizando los parámetros x, y y location
+     * 
+     * @param x
+     * @param y
+     */
     public void setLocation(int x, int y) {
         this.x = location.x = x;
         this.y = location.y = y;
@@ -79,93 +93,75 @@ enum Places {
 /** class that implements the Model of Domestic Robot application */
 public class HouseModel extends GridWorldModel {
 
-    /*
-     * private class HouseElement {
-     * public final int gridConst;
-     * public final Location location;
-     * 
-     * public HouseElement(int gridConst, Location location) {
-     * this.gridConst = gridConst;
-     * this.location = location;
-     * }
-     * }
-     * 
-     * private final Map<Places, HouseElement> elements;
-     */
+    public static final int GSize = 10; // Grid size
+    public static final int FRIDGE = 16; // Capa Fridge
+    public static final int OWNER = 32; // Capa Owner
+    public static final int BIN = 64; // Capa Bin
+    public static final int TRASH = 128; // Capa Trash
+    public static final int DELIVERY = 256; // Capa Delivery
+    public static final int OWNER_MUSK = 512; // Owner Capa Musk
 
-    // the grid size
-    public static final int GSize = 10;
-    public static final int FRIDGE = 16;
-    public static final int OWNER = 32;
-    public static final int BIN = 64;
-    public static final int TRASH = 128;
-    public static final int DELIVERY = 256;
-    public static final int OWNER_MUSK = 512;
-
-    boolean fridgeOpen = false; // whether the fridge is open
-    boolean carryingBeer = false; // whether the robot is carrying beer
-    boolean carryingTrash = false;
-    boolean carryingDelivery = false;
+    boolean fridgeOpen = false; // si la nevera está abierta
+    boolean carryingBeer = false; // si el mayordomo está llevando cerveza
+    boolean carryingTrash = false; // si el cleaner está llevando basura
+    boolean carryingDelivery = false; // si el storekeeper está llevando una entrega
     int sipCount = 0; // how many sip the owner did
     int sipCountMusk = 0;
-    int availableBeers = 1; // how many beers are available
-    int deliveryBeers = 0;
-    int binCount = 0;
-    List<Location> trash = new LinkedList<>();
+    int availableBeers = 1; // cervezas en la nevera
+    int deliveryBeers = 0; // cervezas en la zona delivery
+    int binCount = 0; // núm. cervezas en la papelera
+    List<Location> trash = new LinkedList<>(); // localización de la basura del mapa
 
     public HouseModel() {
-        // create a 7x7 grid with one mobile agent
         /**
          * agentes:
          * 0 -> robot
          * 1 -> robot especializado en mover cervezas de delivery a cervezas
          * 2 -> robot especializado en recoger latas
          **/
-        super(GSize, GSize, SpecializedRobots.values().length);
+        super(GSize, GSize, SpecializedRobots.values().length); // (tamaño, tamaño, número de agentes móviles)
 
-        // initial location of robot (column 3, line 3)
-        // ag code 0 means the robot
+        // inicializar posiciones de los robots
         setAgPos(SpecializedRobots.ROBOT.getValue(), GSize / 2, GSize / 2);
         setAgPos(SpecializedRobots.CLEANER.getValue(), Places.BASE_CLEANER.location);
         setAgPos(SpecializedRobots.STOREKEEPER.getValue(), Places.BASE_STOREKEEPER.location);
 
-        // initial location of fridge and owner
+        // inicializar elementos no móviles
         for (Places val : Places.values()) {
             if (val.gridConst != -1 && val.x != -1 && val.y != -1)
                 add(val.gridConst, val.location);
         }
+
+        // inicializar muros
         // addWall(2, 5, 3, 5);
     }
 
+    /**
+     * Abrir nevera
+     * 
+     * @return
+     */
     boolean openFridge() {
-        /*
-         * if (!fridgeOpen) {
-         * fridgeOpen = true;
-         * return true;
-         * } else {
-         * return false;
-         * }
-         */
         fridgeOpen = true;
         return true;
     }
 
+    /**
+     * Cerrar nevera
+     * 
+     * @return
+     */
     boolean closeFridge() {
-        /*
-         * if (fridgeOpen) {
-         * fridgeOpen = false;
-         * return true;
-         * } else {
-         * return false;
-         * }
-         */
-
         fridgeOpen = false;
         return true;
     }
 
+    /**
+     * El robot coge una cerveza de la nevera
+     * 
+     * @return
+     */
     boolean getBeer() {
-        // if (fridgeOpen && availableBeers > 0 && !carryingBeer) {
         if (availableBeers > 0) {
             availableBeers--;
             carryingBeer = true;
@@ -173,48 +169,52 @@ public class HouseModel extends GridWorldModel {
                 view.update(Places.FRIDGE.x, Places.FRIDGE.y);
         }
         return true;
-        /*
-         * } else {
-         * return false;
-         * }
-         */
     }
 
+    /**
+     * El supermercado deposita las cervezas en la zona de delivery
+     * 
+     * @param n número de cervezas a entregar
+     * @return
+     */
     boolean addBeer(int n) {
         deliveryBeers += n;
         if (view != null)
-            view.update(Places.FRIDGE.x, Places.FRIDGE.y);
+            view.update(Places.DELIVERY.x, Places.DELIVERY.y);
         return true;
     }
 
+    /**
+     * Dar una cerveza al owner
+     * 
+     * @return
+     */
     boolean handInBeer() {
-        // if (carryingBeer) {
         sipCount = 10;
         carryingBeer = false;
         if (view != null)
             view.update(Places.OWNER.x, Places.OWNER.y);
         return true;
-        /*
-         * } else {
-         * return false;
-         * }
-         */
     }
 
+    /**
+     * Dar una cerveza al owner_musk
+     * 
+     * @return
+     */
     boolean handInBeerMusk() {
-        // if (carryingBeer) {
         sipCountMusk = 10;
         carryingBeer = false;
         if (view != null)
             view.update(Places.OWNER_MUSK.x, Places.OWNER_MUSK.y);
         return true;
-        /*
-         * } else {
-         * return false;
-         * }
-         */
     }
 
+    /**
+     * El storekeeper coge las cervezas de la zona delivery
+     * 
+     * @return
+     */
     boolean getDelivered() {
         if (deliveryBeers >= 3 && !carryingDelivery) {
             carryingDelivery = true;
@@ -226,17 +226,24 @@ public class HouseModel extends GridWorldModel {
         return false;
     }
 
+    /**
+     * El storekeeper guarda las cervezas en la nevera
+     * 
+     * @return
+     */
     boolean saveBeer() {
-        // if (carryingDelivery) {
         availableBeers += 3; // Deja 2 y se queda 1 (en total 3)
         carryingDelivery = false;
         if (view != null)
             view.update(Places.DELIVERY.x, Places.DELIVERY.y);
         return true;
-        // }
-        // return false;
     }
 
+    /**
+     * El owner sorbe la cerveza
+     * 
+     * @return
+     */
     boolean sipBeer() {
         if (sipCount > 0) {
             sipCount--;
@@ -248,6 +255,11 @@ public class HouseModel extends GridWorldModel {
         }
     }
 
+    /**
+     * El owner_musk sorbe la cerveza
+     * 
+     * @return
+     */
     boolean sipBeerMusk() {
         if (sipCountMusk > 0) {
             sipCountMusk--;
@@ -259,7 +271,14 @@ public class HouseModel extends GridWorldModel {
         }
     }
 
-    boolean isPlace(int x, int y) {
+    /**
+     * Comprueba si una posición está ocupada por un elemento estático
+     * 
+     * @param x
+     * @param y
+     * @return true si es un lugar, false si no lo es
+     */
+    private boolean isPlace(int x, int y) {
         Location loc = new Location(x, y);
         for (Places p : Places.values()) {
             if (loc.equals(p.location))
@@ -268,6 +287,11 @@ public class HouseModel extends GridWorldModel {
         return false;
     }
 
+    /**
+     * El owner tira una cerveza en una posición aleatoria del mapa
+     * 
+     * @return
+     */
     boolean dropBeer() {
         int posX = 3;
         int posY = 2;
@@ -276,17 +300,21 @@ public class HouseModel extends GridWorldModel {
             posX = (int) Math.round(Math.random() * (GSize - 1));
             posY = (int) Math.round(Math.random() * (GSize - 1));
         } while (!isFree(posX, posY) && !isPlace(posX, posY));
+        // Genera valores aleatorios mientras no encuentra uno libre
 
-        trash.add(new Location(posX, posY));
-
-        // Places.TRASH.setLocation(posX, posY);
-        add(TRASH, posX, posY);
+        trash.add(new Location(posX, posY)); // Se añade la basura a las posiciones de basura
+        add(TRASH, posX, posY); // Se dibuja en el grid
 
         System.out.println("dropped beer: " + posX + ", " + posY);
 
         return true;
     }
 
+    /**
+     * El cleaner recoge una cerveza tirada
+     * 
+     * @return
+     */
     boolean takeTrash() {
         Location lCleaner = getAgPos(SpecializedRobots.CLEANER.getValue());
         Location near = trash.stream().filter(x -> lCleaner.distanceManhattan(x) <= 2).findFirst().orElse(null);
@@ -298,16 +326,13 @@ public class HouseModel extends GridWorldModel {
         remove(TRASH, near);
         trash.remove(near);
         return true;
-        /*
-         * if (lCleaner.distanceManhattan(Places.TRASH.location) > 1)
-         * return false;
-         * carryingTrash = true;
-         * remove(Places.TRASH.gridConst, Places.TRASH.location);
-         * Places.TRASH.setLocation(-1, -1);
-         * return true;
-         */
     }
 
+    /**
+     * El cleaner deposita la basura en la papelera
+     * 
+     * @return
+     */
     boolean dropTrash() {
         Location lCleaner = getAgPos(SpecializedRobots.CLEANER.getValue());
         if (lCleaner.distanceManhattan(Places.BIN.location) > 1)
@@ -317,13 +342,15 @@ public class HouseModel extends GridWorldModel {
         return true;
     }
 
+    /**
+     * Movimiento de un robot
+     * 
+     * @param tipo tipo de robot que se va a mover
+     * @param dest localización del destino
+     * @return
+     */
     boolean moveRobot(SpecializedRobots tipo, Location dest) {
         Location origen = getAgPos(tipo.getValue());
-
-        /*
-         * if (!isFree(dest))
-         * return false;
-         */
 
         if (origen.x < dest.x)
             origen.x++;
@@ -335,16 +362,25 @@ public class HouseModel extends GridWorldModel {
             origen.y--;
 
         setAgPos(tipo.getValue(), origen);
-
         return true;
     }
 
+    /**
+     * El cleaner vacía la papelera
+     * 
+     * @return
+     */
     boolean emptyBin() {
         binCount = 0;
         carryingTrash = true;
         return true;
     }
 
+    /**
+     * El cleaner deposita la bolsa de basura en la zona delivery
+     * 
+     * @return
+     */
     boolean dropBin() {
         carryingTrash = false;
         return true;
