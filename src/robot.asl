@@ -57,33 +57,8 @@ too_much(Owner, B) :-
    :  true
    <- .current_intention(I);
       .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
-/*
-+!bring(Owner,beer)
-   :  not too_much(Owner,beer)
-   <- !go_to(robot,fridge);
-      open(fridge);
-      !get_when_available(beer);
-      close(fridge);
-      !go_to(robot,Owner);
-      hand_in(Owner,beer);
-      ?has(Owner,beer);
-      // remember that another beer has been consumed
-      .date(YY,MM,DD); .time(HH,NN,SS);
-      +consumed(Owner,YY,MM,DD,HH,NN,SS,beer).
-	  
-+!bring(Owner,beer)
-   :  too_much(Owner,beer) & limit(beer,L)
-   <- .concat("The Department of Health does not allow me to give ", Owner, " more than ", L,
-              " beers a day! I am very sorry about that!",M);
-      .send(Owner,tell,msg(M)).
-*/
-
 +!get_when_available(beer) : available(fridge, beer) <- .wait(100); open(fridge); get(beer).
 +!get_when_available(beer) : not available(fridge, beer) <- .wait({ +available(fridge,beer) }); !get_when_available(beer). 
-
-/*+!bring(owner,beer)
-   :  not available(beer,fridge)
-   <- .print("Se acabaron las cervezas"); .wait({+available(beer, frige)}); !bring(owner,beer) . // go to fridge and wait there.*/
 
 -!bring(_,_)
    :  true
@@ -116,7 +91,6 @@ too_much(Owner, B) :-
 +!clean_trash : not where(trash, _, _) <- true.
 +!clean_trash : not bin(full) <- !go_to(cleaner, trash); take(trash); !go_to(cleaner, bin); drop(trash).
 -!clean_trash <- .wait(3000); !clean_trash.
-
 
 +!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait(where(Sitio, _, _)); !go_to(Tipo, Sitio).
 +!go_to(Tipo, Sitio) : at(Tipo, Sitio) <- true.

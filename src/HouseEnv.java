@@ -96,10 +96,11 @@ public class HouseEnv extends Environment {
             }
         }
 
-        addPercept("robot", Literal.parseLiteral(String.format("carrying_trash(%b)", model.carryingTrash)));
+        // Detecta si el cubo de basura está llena
         if (model.binCount >= 2)
             addPercept("robot", Literal.parseLiteral("bin(full)"));
 
+        // El robot cuando está en la nevera puede ver cuantas cervezas quedan
         Location lRobot = model.getAgPos(SpecializedRobots.ROBOT.getValue());
         if (Places.FRIDGE.location.distanceManhattan(lRobot) <= 1) { // Si está en la nevera puede ver cuantas quedan
             addPercept("robot",
@@ -108,6 +109,7 @@ public class HouseEnv extends Environment {
                 addPercept("robot", Literal.parseLiteral("available(fridge, beer)"));
         }
 
+        // has(owner,beer)
         if (model.sipCount > 0) {
             addPercept("robot", hob);
             addPercept("owner", hob);
