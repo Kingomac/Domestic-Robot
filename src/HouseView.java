@@ -4,13 +4,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 
-enum MoveDirections {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT
-}
-
 /** class that implements the View of Domestic Robot application */
 public class HouseView extends GridWorldView {
 
@@ -75,7 +68,7 @@ public class HouseView extends GridWorldView {
         Location lCleaner = hmodel.getAgPos(SpecializedRobots.CLEANER.getValue());
         Location lStorekeeper = hmodel.getAgPos(SpecializedRobots.STOREKEEPER.getValue());
 
-        if (x == lRobot.x && y == lRobot.y) {
+        if (x == lRobot.x && y == lRobot.y) { // Dibujar robot mayordomo
             if (!lRobot.equals(Places.OWNER.location) && !lRobot.equals(Places.FRIDGE.location)) {
                 c = Color.yellow;
                 if (hmodel.carryingBeer)
@@ -84,7 +77,7 @@ public class HouseView extends GridWorldView {
                 g.setColor(Color.black);
                 super.drawString(g, x, y, defaultFont, "Robot");
             }
-        } else if (x == lCleaner.x && y == lCleaner.y) {
+        } else if (x == lCleaner.x && y == lCleaner.y) { // Dibujar cleaner
             c = Color.cyan;
             if (hmodel.carryingTrash) {
                 c = new Color(25, 125, 175);
@@ -92,7 +85,7 @@ public class HouseView extends GridWorldView {
             super.drawAgent(g, x, y, c, -1);
             g.setColor(Color.black);
             super.drawString(g, x, y, defaultFont, "Cleaner");
-        } else if (x == lStorekeeper.x && y == lStorekeeper.y) {
+        } else if (x == lStorekeeper.x && y == lStorekeeper.y) { // Dibujar storekeeper
             c = Color.red;
             if (hmodel.carryingDelivery) {
                 c = new Color(255, 50, 50);
