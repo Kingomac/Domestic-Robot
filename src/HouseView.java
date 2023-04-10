@@ -58,6 +58,22 @@ public class HouseView extends GridWorldView {
                 g.setColor(Color.black);
                 drawString(g, x, y, defaultFont, m);
                 break;
+            case HouseModel.DISHWASHER:
+                super.drawAgent(g, x, y, new Color(92, 158, 224), -1);
+                g.setColor(Color.black);
+                String dishwasherM;
+                if (hmodel.dishwasherCount < 5) {
+                    dishwasherM = String.format("Dishwasher (%d)", hmodel.dishwasherCount);
+                } else {
+                    dishwasherM = "**Dishwasher**";
+                }
+                drawString(g, x, y, defaultFont, dishwasherM);
+                break;
+            case HouseModel.CUPBOARD:
+                super.drawAgent(g, x, y, new Color(179, 129, 43), -1);
+                g.setColor(Color.black);
+                drawString(g, x, y, defaultFont, String.format("Cupboard (%d)", hmodel.cupboardCount));
+                break;
         }
         repaint();
     }
