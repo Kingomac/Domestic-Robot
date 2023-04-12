@@ -29,7 +29,7 @@ enum SpecializedRobots {
 enum Places {
     FRIDGE(new Location(0, 0), HouseModel.FRIDGE),
     OWNER(new Location(HouseModel.GSize - 1, HouseModel.GSize - 1), HouseModel.OWNER),
-    OWNER_MUSK(new Location(HouseModel.GSize / 2, 0), HouseModel.OWNER_MUSK),
+    // OWNER_MUSK(new Location(HouseModel.GSize / 2, 0), HouseModel.OWNER_MUSK),
     BIN(new Location(HouseModel.GSize - 1, 0), HouseModel.BIN),
     DELIVERY(new Location(0, HouseModel.GSize - 1), HouseModel.DELIVERY),
     DISHWASHER(new Location(2, 0), HouseModel.DISHWASHER),
@@ -109,6 +109,7 @@ public class HouseModel extends GridWorldModel {
     boolean carryingBeer = false; // si el mayordomo está llevando cerveza
     boolean carryingTrash = false; // si el cleaner está llevando basura
     boolean carryingDelivery = false; // si el storekeeper está llevando una entrega
+    DishwasherStates dishwasherState = DishwasherStates.OFF;
     int carryingDish = 0; // si el robot está llevando un plato limpio o sucio
     int sipCount = 0; // how many sip the owner did
     int sipCountMusk = 0;
@@ -212,8 +213,8 @@ public class HouseModel extends GridWorldModel {
     boolean handInBeerMusk() {
         sipCountMusk = 10;
         carryingBeer = false;
-        if (view != null)
-            view.update(Places.OWNER_MUSK.x, Places.OWNER_MUSK.y);
+        // if (view != null)
+        // view.update(Places.OWNER_MUSK.x, Places.OWNER_MUSK.y);
         return true;
     }
 
@@ -270,8 +271,8 @@ public class HouseModel extends GridWorldModel {
     boolean sipBeerMusk() {
         if (sipCountMusk > 0) {
             sipCountMusk--;
-            if (view != null)
-                view.update(Places.OWNER_MUSK.x, Places.OWNER_MUSK.y);
+            // if (view != null)
+            // view.update(Places.OWNER_MUSK.x, Places.OWNER_MUSK.y);
             return true;
         } else {
             return false;
@@ -396,18 +397,36 @@ public class HouseModel extends GridWorldModel {
     boolean putDishInDishwasher() {
         dishwasherCount += carryingDish;
         carryingDish = 0;
+        if (view != null)
+            view.update(Places.DISHWASHER.x, Places.DISHWASHER.y);
         return true;
     }
 
     boolean putDishInCupboard() {
         cupboardCount += carryingDish;
         carryingDish = 0;
+        if (view != null)
+            view.update(Places.CUPBOARD.x, Places.CUPBOARD.y);
         return true;
     }
 
     boolean getDishInDishwasher() {
         dishwasherCount = 0;
         carryingDish = 0;
+        if (view != null)
+            view.update(Places.DISHWASHER.x, Places.DISHWASHER.y);
+        return true;
+    }
+
+    boolean takePlateOwner() {
+        carryingDish++;
+        return true;
+    }
+
+    public boolean dishwasherOn() {
+        dishwasherState = DishwasherStates.ON;
+        if (view != null)
+            view.update(Places.DISHWASHER.x, Places.DISHWASHER.y);
         return true;
     }
 

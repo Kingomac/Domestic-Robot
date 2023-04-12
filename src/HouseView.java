@@ -62,10 +62,10 @@ public class HouseView extends GridWorldView {
                 super.drawAgent(g, x, y, new Color(92, 158, 224), -1);
                 g.setColor(Color.black);
                 String dishwasherM;
-                if (hmodel.dishwasherCount < 5) {
-                    dishwasherM = String.format("Dishwasher (%d)", hmodel.dishwasherCount);
-                } else {
+                if (hmodel.dishwasherState.equals(DishwasherStates.ON)) {
                     dishwasherM = "**Dishwasher**";
+                } else {
+                    dishwasherM = String.format("Dishwasher (%d)", hmodel.dishwasherCount);
                 }
                 drawString(g, x, y, defaultFont, dishwasherM);
                 break;

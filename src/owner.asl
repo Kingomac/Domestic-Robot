@@ -19,10 +19,11 @@ money(1000).
 
 // if I have not beer finish, in other case while I have beer, sip
 +!drink(beer) : not has(owner,beer)
-   <- true.
+   <- .send(robot, tell, plate(dirty)).
 +!drink(beer) //: has(owner,beer)
    <- sip(beer);
      !drink(beer).
+-!drink(beer) <- .print("ERROR DRINK OWNER").
 
 +!check_bored : true
    <- .random(X); .wait(X*5000+2000);   // i get bored at random times

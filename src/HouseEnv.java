@@ -3,7 +3,15 @@ import jason.environment.Environment;
 import jason.environment.grid.Location;
 import java.util.logging.Logger;
 
+enum DishwasherStates {
+    OFF,
+    ON,
+    FINISH
+}
+
 public class HouseEnv extends Environment {
+
+    private int dishwasherCycles = 100;
 
     // common literals
     public static final Literal of = Literal.parseLiteral("open(fridge)");
@@ -114,9 +122,30 @@ public class HouseEnv extends Environment {
             addPercept("robot", hob);
             addPercept("owner", hob);
         }
-        if (model.sipCountMusk > 0) {
-            addPercept("robot", Literal.parseLiteral("has(owner_musk,beer)"));
-            addPercept("owner_musk", Literal.parseLiteral("has(owner_musk,beer)"));
+        /*
+         * if (model.sipCountMusk > 0) {
+         * addPercept("robot", Literal.parseLiteral("has(owner_musk,beer)"));
+         * addPercept("owner_musk", Literal.parseLiteral("has(owner_musk,beer)"));
+         * }
+         */
+
+        // Dishwasher
+        addPercept("robot", Literal.parseLiteral(String.format("plate(dishwasher, %d)", model.dishwasherCount)));
+        addPercept("robot",
+                Literal.parseLiteral(String.format("dishwasher(%s)", model.dishwasherState.name().toLowerCase())));
+
+        addPercept("robot", Literal.parseLiteral(String.format("cupboard(dish,%d)", model.cupboardCount)));
+
+        if (model.dishwasherState.equals(DishwasherStates.ON)) {
+            dishwasherCycles--;
+        }
+        if (dishwasherCycles <= 0) {
+            dishwasherCycles = 100;
+            model.dishwasherState = DishwasherStates.FINISH;
+        }
+
+        if (model.dishwasherState.equals(DishwasherStates.FINISH) && model.dishwasherCount == 0) {
+            model.dishwasherState = DishwasherStates.OFF;
         }
 
     }
@@ -215,6 +244,10 @@ public class HouseEnv extends Environment {
             result = model.putDishInCupboard();
         } else if (action.equals(Literal.parseLiteral("get(dish,dishwasher)"))) {
             result = model.getDishInDishwasher();
+        } else if (action.equals(Literal.parseLiteral("dishwasher(on)"))) {
+            result = model.dishwasherOn();
+        } else if (action.getFunctor().equals("take") && action.getTerm(0).toString().equals("plate")) {
+            result = model.takePlateOwner();
         } else {
             logger.info("Failed to execute action " + action);
         }
