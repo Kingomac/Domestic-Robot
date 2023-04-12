@@ -32,6 +32,8 @@ enum Places {
     OWNER_MUSK(new Location(HouseModel.GSize / 2, 0), HouseModel.OWNER_MUSK),
     BIN(new Location(HouseModel.GSize - 1, 0), HouseModel.BIN),
     DELIVERY(new Location(0, HouseModel.GSize - 1), HouseModel.DELIVERY),
+    DISHWASHER(new Location(2, 0), HouseModel.DISHWASHER),
+    CUPBOARD(new Location(4, 0), HouseModel.CUPBOARD),
     BASE_ROBOT(new Location(HouseModel.GSize / 2, HouseModel.GSize / 2), -1, 0),
     BASE_CLEANER(new Location(HouseModel.GSize / 2 - 1, HouseModel.GSize - 1), -1, 0),
     BASE_STOREKEEPER(new Location(HouseModel.GSize / 2 + 1, HouseModel.GSize - 1), -1, 0);
@@ -93,23 +95,28 @@ enum Places {
 /** class that implements the Model of Domestic Robot application */
 public class HouseModel extends GridWorldModel {
 
-    public static final int GSize = 10; // Grid size
+    public static final int GSize = 12; // Grid size
     public static final int FRIDGE = 16; // Capa Fridge
     public static final int OWNER = 32; // Capa Owner
     public static final int BIN = 64; // Capa Bin
     public static final int TRASH = 128; // Capa Trash
     public static final int DELIVERY = 256; // Capa Delivery
     public static final int OWNER_MUSK = 512; // Owner Capa Musk
+    public static final int DISHWASHER = 1024; // Capa dishwasher
+    public static final int CUPBOARD = 2048; // Capa cupboard
 
     boolean fridgeOpen = false; // si la nevera está abierta
     boolean carryingBeer = false; // si el mayordomo está llevando cerveza
     boolean carryingTrash = false; // si el cleaner está llevando basura
     boolean carryingDelivery = false; // si el storekeeper está llevando una entrega
+    int carryingDish = 0; // si el robot está llevando un plato limpio o sucio
     int sipCount = 0; // how many sip the owner did
     int sipCountMusk = 0;
     int availableBeers = 1; // cervezas en la nevera
     int deliveryBeers = 0; // cervezas en la zona delivery
     int binCount = 0; // núm. cervezas en la papelera
+    int dishwasherCount = 0;
+    int cupboardCount = 0;
     List<Location> trash = new LinkedList<>(); // localización de la basura del mapa
 
     public HouseModel() {
@@ -383,6 +390,24 @@ public class HouseModel extends GridWorldModel {
      */
     boolean dropBin() {
         carryingTrash = false;
+        return true;
+    }
+
+    boolean putDishInDishwasher() {
+        dishwasherCount += carryingDish;
+        carryingDish = 0;
+        return true;
+    }
+
+    boolean putDishInCupboard() {
+        cupboardCount += carryingDish;
+        carryingDish = 0;
+        return true;
+    }
+
+    boolean getDishInDishwasher() {
+        dishwasherCount = 0;
+        carryingDish = 0;
         return true;
     }
 

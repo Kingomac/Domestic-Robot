@@ -209,6 +209,12 @@ public class HouseEnv extends Environment {
             result = model.emptyBin();
         } else if (action.equals(Literal.parseLiteral("drop(bin)"))) {
             result = model.dropBin();
+        } else if (action.equals(Literal.parseLiteral("put(dish,dishwasher)"))) {
+            result = model.putDishInDishwasher();
+        } else if (action.equals(Literal.parseLiteral("put(dish,cupboard)"))) {
+            result = model.putDishInCupboard();
+        } else if (action.equals(Literal.parseLiteral("get(dish,dishwasher)"))) {
+            result = model.getDishInDishwasher();
         } else {
             logger.info("Failed to execute action " + action);
         }
