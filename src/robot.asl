@@ -46,15 +46,10 @@ terminar para llevarle cerveza a otro **/
 
 +!save_plates : plate(dishwasher, X) & X == 0 <- true.
 +!save_plates : plate(dishwasher, X) & X > 0 <-
-	.print("VOY AL LAVAVAJILLAS");
 	!go_to(robot, dishwasher);
-	.print("SACO PLATO");
 	get(dish, dishwasher);
-	.print("VOY A LA ALACENA");
 	!go_to(robot, cupboard);
-	.print("METO PLATO EN LA ALACENA");
 	put(dish, cupboard);
-	.print("VOY A POR EL SIGUIENTE PLATO");
 	.wait(100);
 	!save_plates.
 

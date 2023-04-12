@@ -240,7 +240,7 @@ public class HouseEnv extends Environment {
             result = model.dropBin();
         } else if (action.equals(Literal.parseLiteral("put(dish,dishwasher)"))) {
             result = model.putDishInDishwasher();
-            dishwasherCycles += 5;
+            dishwasherCycles += 10;
         } else if (action.equals(Literal.parseLiteral("put(dish,cupboard)"))) {
             result = model.putDishInCupboard();
         } else if (action.equals(Literal.parseLiteral("get(dish,dishwasher)"))) {
