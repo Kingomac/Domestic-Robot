@@ -8,7 +8,7 @@ MAS domestic_robot {
     environment: HouseEnv(gui) // use "nogui" as parameter to not show the GUI
     agents: robot;
             owner;
-			owner_musk;
+			//owner_musk;
             supermarket_mercadona supermarket.asl [beliefs="name(mercadona)"]; // , price(beer, 10), stock(beer, 5), money(100000)
 			supermarket_lidl supermarket.asl [beliefs="name(lidl)"]; // , price(beer, 5), stock(beer, 15), money(60000)
 			supermarket_gadis supermarket.asl [beliefs="name(gadis)"];

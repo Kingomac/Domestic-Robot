@@ -18,7 +18,7 @@ too_much(Owner, B) :-
 
 /** Le pide dinero a los owners **/
 !request_money.
-+!request_money <- .send(owner, achieve, ask_money(robot)); .wait({ +money(_) }); .send(owner_musk, achieve, ask_money(robot)). 
++!request_money <- .send(owner, achieve, ask_money(robot)).//; .wait({ +money(_) }); .send(owner_musk, achieve, ask_money(robot)). 
 +!save_money(Nuevo) <- ?money(Actual); .print("Dinero actual: ", Actual, " que sumado da ", Actual + Nuevo); -+money(Actual + Nuevo).
 
 /** Cuando un supermercado le comunique el precio de la cerveza que actualice el mínimo **/
@@ -44,7 +44,29 @@ terminar para llevarle cerveza a otro **/
    <- .current_intention(I);
       .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
 
++!save_plates : plate(dishwasher, X) & X == 0 <- true.
++!save_plates : plate(dishwasher, X) & X > 0 <-
+	!go_to(robot, dishwasher);
+	get(dish, dishwasher);
+	!go_to(robot, cupboard);
+	put(dish, cupboard);
+	.wait(100);
+	!save_plates.
+
++dishwasher(finish) <- !save_plates.
+	
+//+!give(Owner, beer) : dishwasher(finish) <- !save_plates; !give(Owner, beer).
+
 /** Acción de coger y llevarle al owner correspondiente la cerveza **/
++!give(Owner, beer) : plate(dirty)[source(Owner)] <- 
+	take(plate,Owner);
+	-plate(dirty)[source(Owner)];
+	!go_to(robot, dishwasher);
+	put(dish,dishwasher);
+	?plate(dishwasher, X);
+	if(X >= 5) { dishwasher(on) };
+	!give(Owner,beer).
+
 +!give(Owner,beer)
    :  not too_much(Owner,beer)
    <- !go_to(robot,fridge);

@@ -18,8 +18,8 @@ money(100).
    		!get(beer).
 
 // if I have not beer finish, in other case while I have beer, sip
-+!drink(beer) : not has(owner_musk,beer)
-   <- true.
++!drink(beer) : not has(owner,beer)
+   <- .send(robot, tell, plate(dirty)).
 +!drink(beer) //: has(owner,beer)
    <- sip_musk(beer);
      !drink(beer).
