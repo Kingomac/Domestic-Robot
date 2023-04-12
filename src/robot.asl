@@ -55,9 +55,12 @@ terminar para llevarle cerveza a otro **/
 	.print("METO PLATO EN LA ALACENA");
 	put(dish, cupboard);
 	.print("VOY A POR EL SIGUIENTE PLATO");
+	.wait(100);
 	!save_plates.
 
-+!give(Owner, beer) : dishwasher(finish) <- !save_plates; !give(Owner, beer).
++dishwasher(finish) <- !save_plates.
+	
+//+!give(Owner, beer) : dishwasher(finish) <- !save_plates; !give(Owner, beer).
 
 /** Acción de coger y llevarle al owner correspondiente la cerveza **/
 +!give(Owner, beer) : plate(dirty)[source(Owner)] <- 
@@ -66,7 +69,7 @@ terminar para llevarle cerveza a otro **/
 	!go_to(robot, dishwasher);
 	put(dish,dishwasher);
 	?plate(dishwasher, X);
-	if(X >= 1) { dishwasher(on) };
+	if(X >= 5) { dishwasher(on) };
 	!give(Owner,beer).
 
 +!give(Owner,beer)

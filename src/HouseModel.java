@@ -411,8 +411,8 @@ public class HouseModel extends GridWorldModel {
     }
 
     boolean getDishInDishwasher() {
-        dishwasherCount = 0;
-        carryingDish = 0;
+        dishwasherCount--;
+        carryingDish++;
         if (view != null)
             view.update(Places.DISHWASHER.x, Places.DISHWASHER.y);
         return true;

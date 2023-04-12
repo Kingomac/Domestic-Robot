@@ -11,7 +11,7 @@ enum DishwasherStates {
 
 public class HouseEnv extends Environment {
 
-    private int dishwasherCycles = 100;
+    private int dishwasherCycles = 20;
 
     // common literals
     public static final Literal of = Literal.parseLiteral("open(fridge)");
@@ -140,7 +140,7 @@ public class HouseEnv extends Environment {
             dishwasherCycles--;
         }
         if (dishwasherCycles <= 0) {
-            dishwasherCycles = 100;
+            dishwasherCycles = 10;
             model.dishwasherState = DishwasherStates.FINISH;
         }
 
@@ -240,6 +240,7 @@ public class HouseEnv extends Environment {
             result = model.dropBin();
         } else if (action.equals(Literal.parseLiteral("put(dish,dishwasher)"))) {
             result = model.putDishInDishwasher();
+            dishwasherCycles += 5;
         } else if (action.equals(Literal.parseLiteral("put(dish,cupboard)"))) {
             result = model.putDishInCupboard();
         } else if (action.equals(Literal.parseLiteral("get(dish,dishwasher)"))) {
