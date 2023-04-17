@@ -2,7 +2,6 @@
 
 // my owner should not consume more than 10 beers a day :-)
 limit(beer,5).
-min_price(beer, 100000000, none). // precio mínimo inicial
 free(cleaner). // el cleaner no está ocupado
 
 money(0). // el robot no tiene dinero
@@ -21,18 +20,10 @@ too_much(Owner, B) :-
 +!request_money <- .send(owner, achieve, ask_money(robot)).//; .wait({ +money(_) }); .send(owner_musk, achieve, ask_money(robot)). 
 +!save_money(Nuevo) <- ?money(Actual); .print("Dinero actual: ", Actual, " que sumado da ", Actual + Nuevo); -+money(Actual + Nuevo).
 
-/** Cuando un supermercado le comunique el precio de la cerveza que actualice el mínimo **/
-+price(_,_) : true <- for (price(beer, P)[source(S)]) {
-	?min_price(beer, MIN, _);
-	if (P < MIN){
-		-+min_price(beer, P, S);
-	}
-}.
-
 /** El robot pregunta los precios a los supermercados que le comunicaron su precio al inicio **/
-+!update_prices : true <- for (price(beer, P)[source(S)]) {
-		-price(beer, _)[source(S)];
-		.send(S, askOne, price(beer, X));
++!update_prices : true <- for (offer(Prod, Prec,Stock)[source(S)]) {
+		-offer(Prod, _, _)[source(S)];
+		.send(S, askOne, offer(Prod, Y, X));
 	}.
 
 /** Si el robot tiene la intención de llevarle la cerveza a un owner espera a 
@@ -96,11 +87,11 @@ terminar para llevarle cerveza a otro **/
 +!get_when_available(beer) : not available(fridge, beer) <- .wait({ +available(fridge,beer) }); !get_when_available(beer). 
 
 /** Cuando llegue el pedido el storekeeper recoge el pedido y hace el pago **/
-+delivered(beer,Qtd,OrderId): min_price(beer, P, S) & money(M) & M > P
++delivered(Prod,Qtd,OrderId): min_price(Prod, P, S) & money(M) & M > P
   <- get(delivery);
-  	.concat("Pedido recibido con éxito: beer(", OrderId, "), ", Qtd, " unidades e importe ", P, " robux", Mensaje);
+  	.concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Qtd, " unidades e importe ", P, " robux", Mensaje);
   	.send(S, tell, msg(Mensaje));
-	.send(S, tell, payment(beer, Qtd, P)); 
+	.send(S, tell, payment(Prod, Qtd, P)); 
 	-+money(M - P);
   	!go_to(storekeeper, fridge);
   	open(fridge);
@@ -108,12 +99,20 @@ terminar para llevarle cerveza a otro **/
 	close(fridge);
 	!go_to(storekeeper, base_storekeeper).
 
++!add_min_price(Prod, Price, Super) : not min_price(Prod, _, _) <- +min_price(Prod, Price, Super).
++!add_min_price(Prod, Price, Super) : min_price(Prod, OldPrice, OldSuper) & OldPrice < Price <- true.
++!add_min_price(Prod, Price, Super) : min_price(Prod, OldPrice, OldSuper) & OldPrice > Price <- -+min_price(Prod, Price, Super).
+	
++!calculate_min_prices <- for(offer(Prod, Price, Stock)[source(Super)]) {
+	!add_min_price(Prod, Price, Super);
+}.
+
 /** Si hay menos de 2 cervezas se hace un pedido **/
 +available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-
 	!go_to(storekeeper, delivery);
-	!update_prices; .wait(5000); ?min_price(beer, P, S);
+	!update_prices; .wait(5000); !calculate_min_prices; ?favorite(beer, Prod); ?min_price(Prod, P, S);
 	?money(DineroActual); if(DineroActual <=  P) { !request_money };
-	.send(S, achieve, order(beer,3)).
+	.send(S, achieve, order(Prod,3)).
 
 /** Código cleaner. Si no está ocupado vacía la papelera o recoge basura si hay **/
 +bin(full) <- .wait(free(cleaner)); -free(cleaner); !take_out_trash; +free(cleaner).

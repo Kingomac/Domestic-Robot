@@ -1,9 +1,17 @@
 money(1000).
+favorite(beer, estrella).
+favorite(pincho, durum).
+
 /* Initial goals */
 
+!tell_preferences.
 !get(beer).   // initial goal: get a beer
 !check_bored. // initial goal: verify whether I am getting bored
 
+
++!tell_preferences <- for(favorite(Prod, Pref)) {
+	.send(robot, tell, favorite(Prod, Pref));
+}.
 // Darle dinero al robot si se lo pide
 +!ask_money(Ag) : money(X) & X > 0 <- .send(Ag, achieve, save_money(X * 0.5)); -+money(X * 0.5).
 +!get(beer) : true

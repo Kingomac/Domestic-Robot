@@ -1,6 +1,9 @@
 import jason.asSyntax.*;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
+import java.util.Random;
+
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 enum DishwasherStates {
@@ -29,11 +32,20 @@ public class HouseEnv extends Environment {
 
     static Logger logger = Logger.getLogger(HouseEnv.class.getName());
 
-    HouseModel model; // the model of the grid
+    private HouseModel model; // the model of the grid
+    private HashMap<String, Double> precioProveedor;
+    private double[] priceMultipliers = { 0.992, 0.997, 1.002, 1.004 };
 
     @Override
     public void init(String[] args) {
         model = new HouseModel();
+        precioProveedor = new HashMap<>();
+        precioProveedor.put("mahou", 1.0);
+        precioProveedor.put("estrella", 1.5);
+        precioProveedor.put("skoll", 0.5);
+        precioProveedor.put("tortilla", 2.5);
+        precioProveedor.put("durum", 5.0);
+        precioProveedor.put("empanada", 7.0);
 
         if (args.length == 1 && args[0].equals("gui")) {
             HouseView view = new HouseView(model);
@@ -49,6 +61,8 @@ public class HouseEnv extends Environment {
         clearPercepts("robot");
         clearPercepts("owner");
         clearPercepts("owner_musk");
+        clearPercepts("supermarket_mercadona");
+        clearPercepts("supermarket_lidl");
 
         /*
          * Código para meterle percepts de a dónde pueden ir
@@ -147,6 +161,13 @@ public class HouseEnv extends Environment {
         if (model.dishwasherState.equals(DishwasherStates.FINISH) && model.dishwasherCount == 0) {
             model.dishwasherState = DishwasherStates.OFF;
         }
+
+        precioProveedor.forEach((key, val) -> {
+            double r = priceMultipliers[(int) Math.floor(Math.random() * priceMultipliers.length)];
+            precioProveedor.put(key, val * r);
+            addPercept("supermarket_mercadona", Literal.parseLiteral(String.format("proveedor(%s, %f)", key, val * r)));
+            addPercept("supermarket_lidl", Literal.parseLiteral(String.format("proveedor(%s, %f)", key, val * r)));
+        });
 
     }
 

@@ -12,7 +12,7 @@ public class HouseView extends GridWorldView {
     public HouseView(HouseModel model) {
         super(model, "Domestic Robot", 700);
         hmodel = model;
-        defaultFont = new Font("Arial", Font.BOLD, 16); // change default font
+        defaultFont = new Font("Arial", Font.BOLD, 12); // change default font
         setVisible(true);
         repaint();
     }
@@ -75,7 +75,7 @@ public class HouseView extends GridWorldView {
                 drawString(g, x, y, defaultFont, String.format("Cupboard (%d)", hmodel.cupboardCount));
                 break;
         }
-        repaint();
+        // repaint();
     }
 
     @Override

@@ -39,4 +39,15 @@ public class HouseModelTest {
     h.moveRobot(SpecializedRobots.CLEANER, dest2);
     assertNotEquals(h.getAgPos(SpecializedRobots.CLEANER.getValue()), dest2);
   }
+
+  @Test
+  public void testGetDishInDishwasher() {
+    HouseModel h = new HouseModel();
+    Location dest = new Location(Places.DISHWASHER.x, Places.DISHWASHER.y - 1);
+    SpecializedRobots.ROBOT.setLocation(dest);
+    h.carryingDish = 3;
+    int prevDishes = h.carryingDish;
+    h.getDishInDishwasher();
+    assertEquals(prevDishes - 1, h.carryingDish);
+  }
 }
