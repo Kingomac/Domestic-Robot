@@ -157,6 +157,23 @@ public class HouseModel extends GridWorldModel {
         // addWall(2, 5, 3, 5);
     }
 
+    public boolean isWall(Location l) {
+        return walls.contains(l);
+    }
+
+    public boolean isWall(int x, int y) {
+        return walls.contains(new Location(x, y));
+    }
+
+    public boolean isThereOtherRobot(SpecializedRobots me, Location loc) {
+        int ag = getAgAtPos(loc);
+        return ag != -1 && ag != me.getValue();
+    }
+
+    public boolean isThereOtherRobot(SpecializedRobots me, int x, int y) {
+        return isThereOtherRobot(me, new Location(x, y));
+    }
+
     /**
      * Abrir nevera
      * 

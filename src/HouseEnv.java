@@ -199,7 +199,7 @@ public class HouseEnv extends Environment {
             }
             int x = Integer.parseInt(action.getTerm(1).toString());
             int y = Integer.parseInt(action.getTerm(2).toString());
-            Location next = pathFinder.getDirection(model.getAgPos(tipo.getValue()), new Location(x, y));
+            Location next = pathFinder.getDirection(model.getAgPos(tipo.getValue()), new Location(x, y), tipo);
 
             result = model.moveRobot(tipo, next);
 
