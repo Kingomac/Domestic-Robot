@@ -39,6 +39,7 @@ enum Places {
     BASE_STOREKEEPER(new Location(HouseModel.GSize / 2 + 1, HouseModel.GSize - 1), -1, 0);
 
     public Location location;
+    public Location robotLoc;
     public int x;
     public int y;
     public final int gridConst;
@@ -119,6 +120,7 @@ public class HouseModel extends GridWorldModel {
     int dishwasherCount = 0;
     int cupboardCount = 0;
     List<Location> trash = new LinkedList<>(); // localización de la basura del mapa
+    List<Location> walls = new LinkedList<>();
 
     public HouseModel() {
         /**
@@ -141,6 +143,17 @@ public class HouseModel extends GridWorldModel {
         }
 
         // inicializar muros
+        for (int i = 0; i < 15; i++) {
+            int posX = 3;
+            int posY = 2;
+
+            do {
+                posX = (int) Math.round(Math.random() * (GSize - 1));
+                posY = (int) Math.round(Math.random() * (GSize - 1));
+            } while (isPlace(posX, posY) || !isFree(posX, posY));
+            walls.add(new Location(posX, posY));
+            addWall(posX, posY, posX, posY);
+        }
         // addWall(2, 5, 3, 5);
     }
 
@@ -286,7 +299,7 @@ public class HouseModel extends GridWorldModel {
      * @param y
      * @return true si es un lugar, false si no lo es
      */
-    private boolean isPlace(int x, int y) {
+    public boolean isPlace(int x, int y) {
         Location loc = new Location(x, y);
         for (Places p : Places.values()) {
             if (loc.equals(p.location))

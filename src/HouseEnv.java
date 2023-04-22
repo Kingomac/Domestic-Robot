@@ -12,6 +12,7 @@ enum DishwasherStates {
 public class HouseEnv extends Environment {
 
     private int dishwasherCycles = 20;
+    private PathFinder pathFinder;
 
     // common literals
     public static final Literal of = Literal.parseLiteral("open(fridge)");
@@ -34,6 +35,7 @@ public class HouseEnv extends Environment {
     @Override
     public void init(String[] args) {
         model = new HouseModel();
+        pathFinder = new PathFinder(model);
 
         if (args.length == 1 && args[0].equals("gui")) {
             HouseView view = new HouseView(model);
@@ -197,7 +199,9 @@ public class HouseEnv extends Environment {
             }
             int x = Integer.parseInt(action.getTerm(1).toString());
             int y = Integer.parseInt(action.getTerm(2).toString());
-            result = model.moveRobot(tipo, new Location(x, y));
+            Location next = pathFinder.getDirection(model.getAgPos(tipo.getValue()), new Location(x, y));
+
+            result = model.moveRobot(tipo, next);
 
         } else if (action.equals(gb)) {
             result = model.getBeer();
