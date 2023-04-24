@@ -61,7 +61,6 @@ terminar para llevarle cerveza a otro **/
 +!give(Owner,beer)
    :  not too_much(Owner,beer)
    <- !go_to(robot,fridge);
-      open(fridge);
       !get_when_available(beer);
       close(fridge);
       !go_to(robot,Owner);
