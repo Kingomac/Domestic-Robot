@@ -3,16 +3,25 @@ import jason.environment.grid.*;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.net.URI;
+
+import org.jgrapht.*;
+import org.jgrapht.graph.*;
+import org.jgrapht.nio.*;
+import org.jgrapht.nio.dot.*;
+import org.jgrapht.traverse.*;
 
 /** class that implements the View of Domestic Robot application */
 public class HouseView extends GridWorldView {
 
     HouseModel hmodel;
+    private final static int WINDOW_SIZE = 1000;
 
     public HouseView(HouseModel model) {
-        super(model, "Domestic Robot", 700);
+        super(model, "Domestic Robot", WINDOW_SIZE);
         hmodel = model;
-        defaultFont = new Font("Arial", Font.BOLD, 12); // change default font
+        defaultFont = new Font("Arial", Font.BOLD, 12000 / WINDOW_SIZE); // change default font
+        setResizable(false);
         setVisible(true);
         repaint();
     }
@@ -75,7 +84,14 @@ public class HouseView extends GridWorldView {
                 drawString(g, x, y, defaultFont, String.format("Cupboard (%d)", hmodel.cupboardCount));
                 break;
         }
-        // repaint();
+    }
+
+    @Override
+    public void drawEmpty(Graphics g, int x, int y) {
+        g.setColor(new Color(238, 238, 238));
+        g.fillRect(x * cellSizeW + 1, y * cellSizeH + 1, cellSizeW - 1, cellSizeH - 1);
+        g.setColor(Color.lightGray);
+        g.drawRect(x * cellSizeW, y * cellSizeH, cellSizeW, cellSizeH);
     }
 
     @Override
