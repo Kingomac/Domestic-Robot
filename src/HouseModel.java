@@ -166,8 +166,17 @@ public class HouseModel extends GridWorldModel {
     }
 
     public boolean isThereOtherRobot(SpecializedRobots me, Location loc) {
-        int ag = getAgAtPos(loc);
-        return ag != -1 && ag != me.getValue();
+
+        for (SpecializedRobots rob : SpecializedRobots.values()) {
+            Location pos = getAgPos(rob.getValue());
+            if (rob.equals(me))
+                continue;
+            if (pos.equals(loc))
+                return true;
+        }
+        return false;
+        // int ag = getAgAtPos(loc);
+        // return ag != -1 && ag != me.getValue();
     }
 
     public boolean isThereOtherRobot(SpecializedRobots me, int x, int y) {
