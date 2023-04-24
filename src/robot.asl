@@ -24,7 +24,7 @@ too_much(Owner, B) :-
 +!update_prices : true <- for (offer(Prod, Prec,Stock)[source(S)]) {
 		-offer(Prod, _, _)[source(S)];
 		.send(S, askOne, offer(Prod, Y, X));
-	}.
+	}; .print("Precios actualizados").
 
 /** Si el robot tiene la intención de llevarle la cerveza a un owner espera a 
 terminar para llevarle cerveza a otro **/ 
@@ -86,11 +86,21 @@ terminar para llevarle cerveza a otro **/
 +!get_when_available(beer) : not available(fridge, beer) <- .wait({ +available(fridge,beer) }); !get_when_available(beer). 
 
 /** Cuando llegue el pedido el storekeeper recoge el pedido y hace el pago **/
-+delivered(Prod,Qtd,OrderId): min_price(Prod, P, S) & money(M) & M > P
++delivered(Prod, Cant, OrderId)[source(Super)] : not delivered(_,_,_) & Cant < 3 
+	& offer(Prod, Precio, _)[source(Super)] <-
+	.concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Cant, " unidades e importe ", Precio, " robux", Mensaje);
+  	.send(Super, tell, msg(Mensaje));
+	.send(Super, tell, payment(Prod, Cant, Precio)). 
++delivered(Prod, Cant, OrderId)[source(Super)] : delivered(_,Existente,_) & Cant + Existente < 3
+	& offer(Prod, Precio, _)[source(Super)] <-
+	.concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Cant, " unidades e importe ", Precio, " robux", Mensaje);
+  	.send(Super, tell, msg(Mensaje));
+	.send(Super, tell, payment(Prod, Cant, Precio)).
++delivered(Prod,Qtd,OrderId): min_price(Prod,Super) & offer(Prod, P, _)[source(Super)] & money(M) & M > P
   <- get(delivery);
   	.concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Qtd, " unidades e importe ", P, " robux", Mensaje);
-  	.send(S, tell, msg(Mensaje));
-	.send(S, tell, payment(Prod, Qtd, P)); 
+  	.send(Super, tell, msg(Mensaje));
+	.send(Super, tell, payment(Prod, Qtd, P)); 
 	-+money(M - P);
   	!go_to(storekeeper, fridge);
   	open(fridge);
@@ -98,20 +108,48 @@ terminar para llevarle cerveza a otro **/
 	close(fridge);
 	!go_to(storekeeper, base_storekeeper).
 
-+!add_min_price(Prod, Price, Super) : not min_price(Prod, _, _) <- +min_price(Prod, Price, Super).
-+!add_min_price(Prod, Price, Super) : min_price(Prod, OldPrice, OldSuper) & OldPrice < Price <- true.
-+!add_min_price(Prod, Price, Super) : min_price(Prod, OldPrice, OldSuper) & OldPrice > Price <- -+min_price(Prod, Price, Super).
+
+	
++!add_min_price(Prod, Super) : offer(Prod, _, Cant)[source(Super)] & Cant <= 0  <- true.
+
+
++!add_min_price(Prod, Super) : not min_price(Prod, _) <- +min_price(Prod, Super).
+
+
++!add_min_price(Prod, Super) : min_price(Prod, OldSuper) &
+	offer(Prod, Price, _)[source(Super)] &
+	offer(Prod, OldPrice, _)[source(OldSuper)] & OldPrice <= Price <- true.
+
+
++!add_min_price(Prod, Super) : min_price(Prod, OldSuper) & 
+	offer(Prod, Price, _)[source(Super)] &
+	offer(Prod, OldPrice, _)[source(OldSuper)] &
+	OldPrice > Price <- -min_price(Prod, _); +min_price(Prod, Super).
+	
+	
+-!add_min_price(Prod, Super) <- .print("Error para add_min_price(", Prod, ",", Super , ")").
 	
 +!calculate_min_prices <- for(offer(Prod, Price, Stock)[source(Super)]) {
-	!add_min_price(Prod, Price, Super);
-}.
+	!add_min_price(Prod, Super);
+}; .print("Precios mínimos actualizados").
 
 /** Si hay menos de 2 cervezas se hace un pedido **/
 +available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-
+	.print("Stock bajo, se hace pedido");
 	!go_to(storekeeper, delivery);
-	!update_prices; .wait(5000); !calculate_min_prices; ?favorite(beer, Prod); ?min_price(Prod, P, S);
-	?money(DineroActual); if(DineroActual <=  P) { !request_money };
-	.send(S, achieve, order(Prod,3)).
+	!update_prices; .wait(1000); !calculate_min_prices; ?favorite(beer, Prod);
+	?min_price(Prod, S); ?offer(Prod, P, Cantidad)[source(Super)]; ?money(DineroActual);
+	if(DineroActual <=  P) { !request_money };
+	if(Cantidad >= 3) {
+	 .send(Super, achieve, order(Prod,3));
+	} else {
+		.send(Super, achieve, order(Prod,Cantidad));
+		!update_prices;.wait(1000);!calculate_min_prices; .wait(1000);
+		.send(Super, achieve, order(Prod,3 - Cantidad));
+	}.
+	
+/** Gestión si el supermercado tiene menos de 3 cervezas **/
++stock(Prod, Num)[source(S)] <- .send(S, achieve, order(Prod, Num)).
 
 /** Código cleaner. Si no está ocupado vacía la papelera o recoge basura si hay **/
 +bin(full) <- .wait(free(cleaner)); -free(cleaner); !take_out_trash; +free(cleaner).

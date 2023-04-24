@@ -114,6 +114,7 @@ public class HouseModel extends GridWorldModel {
     int sipCount = 0; // how many sip the owner did
     int sipCountMusk = 0;
     int availableBeers = 1; // cervezas en la nevera
+    int availablePinchos = 1; // pinchos en la nevera
     int deliveryBeers = 0; // cervezas en la zona delivery
     int binCount = 0; // núm. cervezas en la papelera
     int dishwasherCount = 0;
@@ -172,6 +173,7 @@ public class HouseModel extends GridWorldModel {
     boolean getBeer() {
         if (availableBeers > 0) {
             availableBeers--;
+            availablePinchos--;
             carryingBeer = true;
             if (view != null)
                 view.update(Places.FRIDGE.x, Places.FRIDGE.y);
@@ -241,6 +243,7 @@ public class HouseModel extends GridWorldModel {
      */
     boolean saveBeer() {
         availableBeers += 3; // Deja 2 y se queda 1 (en total 3)
+        availablePinchos += 3;
         carryingDelivery = false;
         if (view != null)
             view.update(Places.DELIVERY.x, Places.DELIVERY.y);

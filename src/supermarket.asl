@@ -23,7 +23,7 @@ last_order_id(1). // initial belief
 			?proveedor(Prod, Precio);
 			?profit(Profit);
 			.random(S);
-			+offer(Prod,Precio * Profit, math.round((S + 1) * 5));
+			+offer(Prod,Precio * Profit, 1);//math.round((S + 1) * 5));
 			.send(robot, tell, offer(Prod,Precio * Profit, math.round((S + 1) * 5)));
 		}.
 
@@ -47,7 +47,7 @@ last_order_id(1). // initial belief
 +!order(Product,Qtd)[source(Ag)] : true 
    <- 	?offer(Product, Precio, Numero_cerves);
    		.print("Lo siento, solo nos quedan " , Numero_cerves, " ", Product);
-		.send(Ag,tell,stock(Numero_cerves)).
+		.send(Ag,tell,stock(Product, Numero_cerves)).
 		
 /** Si se queda sin stock lo recarga **/
 +offer(Producto, Precio, Cantidad) : Cantidad <= 0 & 
