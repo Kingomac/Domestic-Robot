@@ -111,22 +111,14 @@ terminar para llevarle cerveza a otro **/
 
 	
 +!add_min_price(Prod, Super) : offer(Prod, _, Cant)[source(Super)] & Cant <= 0  <- true.
-
-
 +!add_min_price(Prod, Super) : not min_price(Prod, _) <- +min_price(Prod, Super).
-
-
 +!add_min_price(Prod, Super) : min_price(Prod, OldSuper) &
 	offer(Prod, Price, _)[source(Super)] &
 	offer(Prod, OldPrice, _)[source(OldSuper)] & OldPrice <= Price <- true.
-
-
 +!add_min_price(Prod, Super) : min_price(Prod, OldSuper) & 
 	offer(Prod, Price, _)[source(Super)] &
 	offer(Prod, OldPrice, _)[source(OldSuper)] &
 	OldPrice > Price <- -min_price(Prod, _); +min_price(Prod, Super).
-	
-	
 -!add_min_price(Prod, Super) <- .print("Error para add_min_price(", Prod, ",", Super , ")").
 	
 +!calculate_min_prices <- for(offer(Prod, Price, Stock)[source(Super)]) {
@@ -149,7 +141,7 @@ terminar para llevarle cerveza a otro **/
 	}.
 	
 /** Gestión si el supermercado tiene menos de 3 cervezas **/
-+stock(Prod, Num)[source(S)] <- .send(S, achieve, order(Prod, Num)).
+//+stock(Prod, Num)[source(S)] <- .send(S, achieve, order(Prod, Num)).
 
 /** Código cleaner. Si no está ocupado vacía la papelera o recoge basura si hay **/
 +bin(full) <- .wait(free(cleaner)); -free(cleaner); !take_out_trash; +free(cleaner).
