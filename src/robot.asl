@@ -41,7 +41,7 @@ terminar para llevarle cerveza a otro **/
 	get(dish, dishwasher);
 	!go_to(robot, cupboard);
 	put(dish, cupboard);
-	.wait(100);
+	.wait(plate(dishwasher,_));
 	!save_plates.
 
 +dishwasher(finish) <- !save_plates.
@@ -55,7 +55,7 @@ terminar para llevarle cerveza a otro **/
 	!go_to(robot, dishwasher);
 	put(dish,dishwasher);
 	?plate(dishwasher, X);
-	if(X >= 5) { dishwasher(on) };
+	if(X >= 6) { dishwasher(on) };
 	!give(Owner,beer).
 
 +!give(Owner,beer)
@@ -111,14 +111,18 @@ terminar para llevarle cerveza a otro **/
 
 	
 +!add_min_price(Prod, Super) : offer(Prod, _, Cant)[source(Super)] & Cant <= 0  <- true.
+
 +!add_min_price(Prod, Super) : not min_price(Prod, _) <- +min_price(Prod, Super).
+
 +!add_min_price(Prod, Super) : min_price(Prod, OldSuper) &
 	offer(Prod, Price, _)[source(Super)] &
 	offer(Prod, OldPrice, _)[source(OldSuper)] & OldPrice <= Price <- true.
+	
 +!add_min_price(Prod, Super) : min_price(Prod, OldSuper) & 
 	offer(Prod, Price, _)[source(Super)] &
 	offer(Prod, OldPrice, _)[source(OldSuper)] &
 	OldPrice > Price <- -min_price(Prod, _); +min_price(Prod, Super).
+	
 -!add_min_price(Prod, Super) <- .print("Error para add_min_price(", Prod, ",", Super , ")").
 	
 +!calculate_min_prices <- for(offer(Prod, Price, Stock)[source(Super)]) {
@@ -130,6 +134,7 @@ terminar para llevarle cerveza a otro **/
 	.print("Stock bajo, se hace pedido");
 	!go_to(storekeeper, delivery);
 	!update_prices; .wait(1000); !calculate_min_prices; ?favorite(beer, Prod);
+	.wait(min_price(Prod,_));
 	?min_price(Prod, S); ?offer(Prod, P, Cantidad)[source(Super)]; ?money(DineroActual);
 	if(DineroActual <=  P) { !request_money };
 	if(Cantidad >= 3) {
@@ -146,12 +151,14 @@ terminar para llevarle cerveza a otro **/
 /** Código cleaner. Si no está ocupado vacía la papelera o recoge basura si hay **/
 +bin(full) <- .wait(free(cleaner)); -free(cleaner); !take_out_trash; +free(cleaner).
 +where(trash, A, B) <- .wait(free(cleaner)); -free(cleaner); !clean_trash; +free(cleaner).
++free(cleaner) <- !go_to(cleaner, cleaner_base).
+-free(cleaner) <- .drop_intention(go_to(cleaner,cleaner_base)).
 
-+!take_out_trash <- !go_to(cleaner, bin); empty(bin); !go_to(cleaner, delivery); drop(bin); !go_to(cleaner, base_cleaner). 
++!take_out_trash <- !go_to(cleaner, bin); empty(bin); !go_to(cleaner, delivery); drop(bin). 
 
 +!clean_trash : not where(trash, _, _) <- true.
 +!clean_trash : not bin(full) <- !go_to(cleaner, trash); take(trash); !go_to(cleaner, bin); drop(trash).
--!clean_trash <- .wait(3000); !clean_trash.
+-!clean_trash <- true.//.wait(1500); !clean_trash.
 
 /** Movimiento simple en diagonal **/
 +!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait(where(Sitio, _, _)); !go_to(Tipo, Sitio).

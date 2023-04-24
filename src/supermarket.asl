@@ -18,8 +18,9 @@ last_order_id(1). // initial belief
 
 +!start : true <-
 		.random(M); +money((M + 100) * 1000);
-		.wait({+proveedor(_,_)});
+		.wait(100);
 		for(product(Prod)) {
+			.wait(proveedor(Prod,_));
 			?proveedor(Prod, Precio);
 			?profit(Profit);
 			.random(S);

@@ -66,6 +66,10 @@ public class PathFinder {
     GraphPath<Location, DefaultEdge> path = DijkstraShortestPath.findPathBetween(grafo, origen,
         destino);
 
+    if (path.getVertexList() == null || path.getVertexList().size() < 2) {
+      return origen;
+    }
+
     return path.getVertexList().get(1);
   }
 
