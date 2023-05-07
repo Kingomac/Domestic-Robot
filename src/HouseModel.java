@@ -96,7 +96,7 @@ enum Places {
 /** class that implements the Model of Domestic Robot application */
 public class HouseModel extends GridWorldModel {
 
-    public static final int GSize = 12; // Grid size
+    public static final int GSize = 11; // Grid size
     public static final int FRIDGE = 16; // Capa Fridge
     public static final int OWNER = 32; // Capa Owner
     public static final int BIN = 64; // Capa Bin
@@ -155,7 +155,7 @@ public class HouseModel extends GridWorldModel {
             walls.add(new Location(posX, posY));
             addWall(posX, posY, posX, posY);
         }
-        // addWall(2, 5, 3, 5);
+        addWall(4, 6, 7, 6);
     }
 
     public boolean isWall(Location l) {
