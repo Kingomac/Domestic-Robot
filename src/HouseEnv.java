@@ -202,8 +202,12 @@ public class HouseEnv extends Environment {
                 System.out.println("MOVE_ROBOT OF UNRECOGNIZED ROBOT. Check the move_robot functor at HouseEnv.java");
                 return false;
             }
-            String dir = action.getTerm(1).toString();
-            result = model.moveRobot(tipo, dir);
+            int x = Integer.parseInt(action.getTerm(1).toString());
+            int y = Integer.parseInt(action.getTerm(2).toString());
+
+            Location next = pathFinder.getDirection(model.getAgPos(tipo.getValue()), new Location(x, y), tipo);
+
+            result = model.moveRobot(tipo, next);
 
         } else if (action.equals(gb)) {
             result = model.getBeer();

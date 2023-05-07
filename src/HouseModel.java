@@ -416,6 +416,13 @@ public class HouseModel extends GridWorldModel {
         return true;
     }
 
+    boolean moveRobot(SpecializedRobots tipo, Location dest) {
+        Location origen = getAgPos(tipo.getValue());
+
+        setAgPos(tipo.getValue(), dest);
+        return true;
+    }
+
     /**
      * El cleaner vacía la papelera
      * 
