@@ -3,13 +3,6 @@ import jason.environment.grid.*;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.net.URI;
-
-import org.jgrapht.*;
-import org.jgrapht.graph.*;
-import org.jgrapht.nio.*;
-import org.jgrapht.nio.dot.*;
-import org.jgrapht.traverse.*;
 
 /** class that implements the View of Domestic Robot application */
 public class HouseView extends GridWorldView {

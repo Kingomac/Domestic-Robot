@@ -59,6 +59,10 @@ public class HouseEnv extends Environment {
 
     /** creates the agents percepts based on the HouseModel */
     void updatePercepts() {
+
+        PathFinder a = new PathFinder(model);
+        a.getDirection(new Location(5, 6), new Location(10, 8), null);
+
         // clear the percepts of the agents
         clearPercepts("robot");
         clearPercepts("owner");
@@ -185,26 +189,6 @@ public class HouseEnv extends Environment {
 
         } else if (action.getFunctor().equals("move_robot")) {
             String robot = action.getTerm(0).toString();
-            /*
-             * int x = Integer.parseInt(action.getTerm(1).toString());
-             * int y = Integer.parseInt(action.getTerm(2).toString());
-             * SpecializedRobots tipo;
-             * 
-             * if (robot.equals("cleaner"))
-             * tipo = SpecializedRobots.CLEANER;
-             * else if (robot.equals("storekeeper"))
-             * tipo = SpecializedRobots.STOREKEEPER;
-             * else if (robot.equals("robot"))
-             * tipo = SpecializedRobots.ROBOT;
-             * else {
-             * System.out.
-             * println("MOVE_ROBOT OF UNRECOGNIZED ROBOT. Check the move_robot functor at HouseEnv.java"
-             * );
-             * return false;
-             * }
-             * 
-             * result = model.moveRobot(tipo, new Location(x, y));
-             */
 
             SpecializedRobots tipo;
 
@@ -218,11 +202,8 @@ public class HouseEnv extends Environment {
                 System.out.println("MOVE_ROBOT OF UNRECOGNIZED ROBOT. Check the move_robot functor at HouseEnv.java");
                 return false;
             }
-            int x = Integer.parseInt(action.getTerm(1).toString());
-            int y = Integer.parseInt(action.getTerm(2).toString());
-            Location next = pathFinder.getDirection(model.getAgPos(tipo.getValue()), new Location(x, y), tipo);
-
-            result = model.moveRobot(tipo, next);
+            String dir = action.getTerm(1).toString();
+            result = model.moveRobot(tipo, dir);
 
         } else if (action.equals(gb)) {
             result = model.getBeer();
