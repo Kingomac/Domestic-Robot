@@ -1,16 +1,15 @@
+package movement;
+
 import java.util.List;
+import house.HouseModel;
+import house.SpecializedRobots;
 import java.util.LinkedList;
 import java.util.Collections;
-
-import jason.asSemantics.DefaultInternalAction;
-import jason.asSemantics.TransitionSystem;
-import jason.asSemantics.Unifier;
-import jason.asSyntax.Term;
 import jason.environment.grid.Location;
 
 public class PathFinder {
 
-  public class Celda {
+  private class Celda {
     public int f, h, g;
     public int padre_i, padre_j;
 
@@ -88,9 +87,9 @@ public class PathFinder {
           List<Location> resultado = getResult(infoMatriz, origen, destino);
           // System.out.println("RESULTADO");
           // System.out.println(resultado.toString());
-          // return resultado.get(0);
+          return resultado.get(0);
           ///////////////////////////////////// return getResultado(infoMatriz, destino);
-          return resultado.get(resultado.size() - 1);
+          // return resultado.get(resultado.size() - 1);
         }
 
         else if (!listaCerrada.contains(next)) {
@@ -127,14 +126,14 @@ public class PathFinder {
   List<Location> getResult(Celda[][] infoMatriz, Location orig, Location dest) {
     int i = dest.y;
     int j = dest.x;
-    System.out.println("aaaaaaaaaaaaa");
+    // System.out.println("aaaaaaaaaaaaa");
     List<Location> resultado = new LinkedList<>();
     while (!(infoMatriz[i][j].padre_i == i && infoMatriz[i][j].padre_j == j)) {
-      System.out.println("infomatriz[" + i + "," + j + "]: " + infoMatriz[i][j]);
+      // System.out.println("infomatriz[" + i + "," + j + "]: " + infoMatriz[i][j]);
       resultado.add(new Location(j, i));
       int newi = infoMatriz[i][j].padre_i;
       int newj = infoMatriz[i][j].padre_j;
-      System.out.format("[%d,%d] -> [%d,%d], ", i, j, newi, newj);
+      // System.out.format("[%d,%d] -> [%d,%d], ", i, j, newi, newj);
       i = newi;
       j = newj;
     }

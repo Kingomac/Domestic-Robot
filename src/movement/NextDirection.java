@@ -1,4 +1,6 @@
+package movement;
 
+import house.HouseModel;
 import jason.asSemantics.DefaultInternalAction;
 import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
@@ -7,24 +9,20 @@ import jason.asSyntax.NumberTerm;
 import jason.asSyntax.Term;
 import jason.environment.grid.Location;
 
-public class nextDirection extends DefaultInternalAction {
+public class NextDirection extends DefaultInternalAction {
 
   private static HouseModel model;
 
   private static PathFinder pathFinder;
 
   public static void initialize(HouseModel model) {
-    nextDirection.model = model;
+    NextDirection.model = model;
     pathFinder = new PathFinder(model);
   }
 
   @Override
   public Object execute(TransitionSystem ts, Unifier un, Term[] args) {
     try {
-      for (Term argi : args) {
-        if (!argi.isNumeric())
-          throw new IllegalArgumentException("nextDirection arguments must be integers");
-      }
       int origenX = (int) ((NumberTerm) args[0]).solve();
       int origenY = (int) ((NumberTerm) args[1]).solve();
       int destinoX = (int) ((NumberTerm) args[2]).solve();
@@ -48,7 +46,7 @@ public class nextDirection extends DefaultInternalAction {
         toret = MovementDirections.NONE;
         throw new RuntimeException("Next direction is to stay still");
       }
-
+      System.out.println("NEXTDIRECTION -> " + toret.name());
       return un.unifies(args[4], new Atom(toret.name().toLowerCase()));
 
     } /*

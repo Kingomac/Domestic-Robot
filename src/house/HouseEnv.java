@@ -1,7 +1,12 @@
+package house;
+
 import jason.asSemantics.Unifier;
 import jason.asSyntax.*;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
+import movement.MovementDirections;
+import movement.PathFinder;
+import movement.NextDirection;
 
 import java.util.Random;
 
@@ -41,7 +46,7 @@ public class HouseEnv extends Environment {
     @Override
     public void init(String[] args) {
         model = new HouseModel();
-        nextDirection.initialize(model);
+        NextDirection.initialize(model);
         precioProveedor = new HashMap<>();
         precioProveedor.put("mahou", 1.0);
         precioProveedor.put("estrella", 1.5);
@@ -204,7 +209,7 @@ public class HouseEnv extends Environment {
                 System.out.println("MOVE_ROBOT OF UNRECOGNIZED ROBOT. Check the move_robot functor at HouseEnv.java");
                 return false;
             }
-            MovementDirections dir = MovementDirections.from(action.getTerm(1).toString());
+            MovementDirections dir = MovementDirections.from(action.getTerm(1).toString().toUpperCase());
             result = model.moveRobot(tipo, dir);
 
         } else if (action.equals(gb)) {
