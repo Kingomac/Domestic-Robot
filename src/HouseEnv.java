@@ -1,6 +1,8 @@
+import jason.asSemantics.Unifier;
 import jason.asSyntax.*;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
+
 import java.util.Random;
 
 import java.util.HashMap;
@@ -15,7 +17,6 @@ enum DishwasherStates {
 public class HouseEnv extends Environment {
 
     private int dishwasherCycles = 10;
-    private PathFinder pathFinder;
 
     // common literals
     public static final Literal of = Literal.parseLiteral("open(fridge)");
@@ -40,7 +41,7 @@ public class HouseEnv extends Environment {
     @Override
     public void init(String[] args) {
         model = new HouseModel();
-        pathFinder = new PathFinder(model);
+        nextDirection.initialize(model);
         precioProveedor = new HashMap<>();
         precioProveedor.put("mahou", 1.0);
         precioProveedor.put("estrella", 1.5);
@@ -61,7 +62,7 @@ public class HouseEnv extends Environment {
     void updatePercepts() {
 
         PathFinder a = new PathFinder(model);
-        a.getDirection(new Location(5, 6), new Location(10, 8), null);
+        a.getNextPosition(new Location(5, 6), new Location(10, 8), null);
 
         // clear the percepts of the agents
         clearPercepts("robot");
@@ -187,6 +188,7 @@ public class HouseEnv extends Environment {
         } else if (action.equals(clf)) { // clf = close(fridge)
             result = model.closeFridge();
 
+        } else if (action.getFunctor().equals("next_direction")) {
         } else if (action.getFunctor().equals("move_robot")) {
             String robot = action.getTerm(0).toString();
 
@@ -202,12 +204,8 @@ public class HouseEnv extends Environment {
                 System.out.println("MOVE_ROBOT OF UNRECOGNIZED ROBOT. Check the move_robot functor at HouseEnv.java");
                 return false;
             }
-            int x = Integer.parseInt(action.getTerm(1).toString());
-            int y = Integer.parseInt(action.getTerm(2).toString());
-
-            Location next = pathFinder.getDirection(model.getAgPos(tipo.getValue()), new Location(x, y), tipo);
-
-            result = model.moveRobot(tipo, next);
+            MovementDirections dir = MovementDirections.from(action.getTerm(1).toString());
+            result = model.moveRobot(tipo, dir);
 
         } else if (action.equals(gb)) {
             result = model.getBeer();

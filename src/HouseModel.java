@@ -416,8 +416,23 @@ public class HouseModel extends GridWorldModel {
         return true;
     }
 
-    boolean moveRobot(SpecializedRobots tipo, Location dest) {
+    boolean moveRobot(SpecializedRobots tipo, MovementDirections dir) {
         Location origen = getAgPos(tipo.getValue());
+
+        if (dir.equals(MovementDirections.UP))
+            origen.y--;
+        else if (dir.equals(MovementDirections.DOWN))
+            origen.y++;
+        else if (dir.equals(MovementDirections.LEFT))
+            origen.x--;
+        else if (dir.equals(MovementDirections.RIGHT))
+            origen.x++;
+
+        setAgPos(tipo.getValue(), origen);
+        return true;
+    }
+
+    boolean moveRobot(SpecializedRobots tipo, Location dest) {
 
         setAgPos(tipo.getValue(), dest);
         return true;

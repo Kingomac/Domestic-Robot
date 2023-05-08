@@ -1,12 +1,12 @@
-import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.HashMap;
-import java.util.Arrays;
 import java.util.Collections;
 
+import jason.asSemantics.DefaultInternalAction;
+import jason.asSemantics.TransitionSystem;
+import jason.asSemantics.Unifier;
+import jason.asSyntax.Term;
 import jason.environment.grid.Location;
-import jason.stdlib.list;
 
 public class PathFinder {
 
@@ -42,7 +42,7 @@ public class PathFinder {
     this.model = model;
   }
 
-  public Location getDirection(Location origen, Location destino, SpecializedRobots me) {
+  public Location getNextPosition(Location origen, Location destino, SpecializedRobots me) {
 
     Celda[][] infoMatriz = new Celda[model.getHeight()][model.getWidth()];
     for (int i = 0; i < infoMatriz.length; i++) {
@@ -67,29 +67,30 @@ public class PathFinder {
 
     boolean caminoEncontrado = false;
     while (!listaAbierta.isEmpty() && !caminoEncontrado) {
-      System.out.println("Lista abierta: " + listaAbierta.toString());
-      System.out.println("Lista cerrada: " + listaCerrada.toString());
+      // System.out.println("Lista abierta: " + listaAbierta.toString());
+      // System.out.println("Lista cerrada: " + listaCerrada.toString());
       Location q = getMinF(listaAbierta, listaCerrada, infoMatriz);
       listaAbierta.remove(q);
       listaCerrada.add(q);
 
-      System.out.println("Lista abierta: " + listaAbierta.toString());
-      System.out.println("Lista cerrada: " + listaCerrada.toString());
+      // System.out.println("Lista abierta: " + listaAbierta.toString());
+      // System.out.println("Lista cerrada: " + listaCerrada.toString());
 
-      for (Location next : getNextLocations(q)) {
-        System.out.println("-- Checking next location: " + next);
+      for (Location next : getFreeAdjacentPositions(q)) {
+        // System.out.println("-- Checking next location: " + next);
         if (next.equals(destino)) {
-          System.out.println("Lista abierta: " + listaAbierta.toString());
-          System.out.println("Lista cerrada: " + listaCerrada.toString());
-          System.out.println("Camino encontrado: " + next);
+          // System.out.println("Lista abierta: " + listaAbierta.toString());
+          // System.out.println("Lista cerrada: " + listaCerrada.toString());
+          // System.out.println("Camino encontrado: " + next);
           caminoEncontrado = true;
           infoMatriz[destino.y][destino.x].padre_i = q.y;
           infoMatriz[destino.y][destino.x].padre_j = q.x;
-          List<Location> resultado = getResultado(infoMatriz, origen, destino);
-          System.out.println("RESULTADO");
-          System.out.println(resultado.toString());
-          return resultado.get(0);
+          List<Location> resultado = getResult(infoMatriz, origen, destino);
+          // System.out.println("RESULTADO");
+          // System.out.println(resultado.toString());
+          // return resultado.get(0);
           ///////////////////////////////////// return getResultado(infoMatriz, destino);
+          return resultado.get(resultado.size() - 1);
         }
 
         else if (!listaCerrada.contains(next)) {
@@ -111,7 +112,7 @@ public class PathFinder {
     return null;
   }
 
-  Location getMinF(List<Location> listaAbierta, List<Location> listaCerrada, Celda[][] infoMatriz) {
+  private Location getMinF(List<Location> listaAbierta, List<Location> listaCerrada, Celda[][] infoMatriz) {
     int minF = Integer.MAX_VALUE;
     Location res = null;
     for (Location i : listaAbierta) {
@@ -123,7 +124,7 @@ public class PathFinder {
     return res;
   }
 
-  List<Location> getResultado(Celda[][] infoMatriz, Location orig, Location dest) {
+  List<Location> getResult(Celda[][] infoMatriz, Location orig, Location dest) {
     int i = dest.y;
     int j = dest.x;
     System.out.println("aaaaaaaaaaaaa");
@@ -149,7 +150,7 @@ public class PathFinder {
    * @param pos
    * @return
    */
-  List<Location> getNextLocations(Location pos) {
+  private List<Location> getFreeAdjacentPositions(Location pos) {
     List<Location> toret = new LinkedList<>();
     if (model.inGrid(pos.x + 1, pos.y) && model.isFreeOfObstacle(pos.x + 1, pos.y))
       toret.add(new Location(pos.x + 1, pos.y));
