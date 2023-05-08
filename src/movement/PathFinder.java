@@ -48,7 +48,7 @@ public class PathFinder {
       for (int j = 0; j < infoMatriz[i].length; j++) {
         infoMatriz[i][j] = new Celda();
         infoMatriz[i][j].h = new Location(j, i).distanceManhattan(destino);
-        if (!model.isFreeOfObstacle(i, j)) {
+        if (!model.robotCanGo(me, i, j)) {
           infoMatriz[i][j].g = Integer.MAX_VALUE;
         }
       }
@@ -75,7 +75,7 @@ public class PathFinder {
       // System.out.println("Lista abierta: " + listaAbierta.toString());
       // System.out.println("Lista cerrada: " + listaCerrada.toString());
 
-      for (Location next : getFreeAdjacentPositions(q)) {
+      for (Location next : getFreeAdjacentPositions(q, destino, me)) {
         // System.out.println("-- Checking next location: " + next);
         if (next.equals(destino)) {
           // System.out.println("Lista abierta: " + listaAbierta.toString());
@@ -107,7 +107,7 @@ public class PathFinder {
     }
 
     if (!caminoEncontrado)
-      System.out.println("Error encontrando camino");
+      System.out.println("Error: " + me.name() + " está más perdido de Juanfran en una peluquería");
     return null;
   }
 
@@ -149,15 +149,19 @@ public class PathFinder {
    * @param pos
    * @return
    */
-  private List<Location> getFreeAdjacentPositions(Location pos) {
+  private List<Location> getFreeAdjacentPositions(Location pos, Location destino, SpecializedRobots me) {
     List<Location> toret = new LinkedList<>();
-    if (model.inGrid(pos.x + 1, pos.y) && model.isFreeOfObstacle(pos.x + 1, pos.y))
+    if (model.inGrid(pos.x + 1, pos.y)
+        && (model.robotCanGo(me, pos.x + 1, pos.y) || destino.equals(new Location(pos.x + 1, pos.y))))
       toret.add(new Location(pos.x + 1, pos.y));
-    if (model.inGrid(pos.x - 1, pos.y) && model.isFreeOfObstacle(pos.x - 1, pos.y))
+    if (model.inGrid(pos.x - 1, pos.y)
+        && (model.robotCanGo(me, pos.x - 1, pos.y) || destino.equals(new Location(pos.x - 1, pos.y))))
       toret.add(new Location(pos.x - 1, pos.y));
-    if (model.inGrid(pos.x, pos.y - 1) && model.isFreeOfObstacle(pos.x, pos.y - 1))
+    if (model.inGrid(pos.x, pos.y - 1)
+        && (model.robotCanGo(me, pos.x, pos.y - 1) || destino.equals(new Location(pos.x, pos.y - 1))))
       toret.add(new Location(pos.x, pos.y - 1));
-    if (model.inGrid(pos.x, pos.y + 1) && model.isFreeOfObstacle(pos.x, pos.y + 1))
+    if (model.inGrid(pos.x, pos.y + 1)
+        && (model.robotCanGo(me, pos.x, pos.y + 1) || destino.equals(new Location(pos.x, pos.y + 1))))
       toret.add(new Location(pos.x, pos.y + 1));
 
     return toret;

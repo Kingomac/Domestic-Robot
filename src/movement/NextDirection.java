@@ -1,6 +1,8 @@
 package movement;
 
 import house.HouseModel;
+import house.SpecializedRobots;
+import jason.JasonException;
 import jason.asSemantics.DefaultInternalAction;
 import jason.asSemantics.TransitionSystem;
 import jason.asSemantics.Unifier;
@@ -27,12 +29,17 @@ public class NextDirection extends DefaultInternalAction {
       int origenY = (int) ((NumberTerm) args[1]).solve();
       int destinoX = (int) ((NumberTerm) args[2]).solve();
       int destinoY = (int) ((NumberTerm) args[3]).solve();
+      SpecializedRobots robot = SpecializedRobots.from(args[4].toString());
 
-      if (!model.inGrid(destinoX, destinoY) || !model.isFree(destinoX, destinoY))
+      if (!model.inGrid(destinoX, destinoY))
         throw new IllegalArgumentException("nextDirection destiny must be a free valid position");
 
       Location nextLocation = pathFinder.getNextPosition(new Location(origenX, origenY),
-          new Location(destinoX, destinoY), null);
+          new Location(destinoX, destinoY), robot);
+      if (nextLocation == null) {
+        nextLocation = new Location(origenX, origenY);
+        throw new JasonException("Camino no encontrado");
+      }
       MovementDirections toret = null;
       if (nextLocation.x < origenX)
         toret = MovementDirections.LEFT;
@@ -47,7 +54,7 @@ public class NextDirection extends DefaultInternalAction {
         throw new RuntimeException("Next direction is to stay still");
       }
       System.out.println("NEXTDIRECTION -> " + toret.name());
-      return un.unifies(args[4], new Atom(toret.name().toLowerCase()));
+      return un.unifies(args[5], new Atom(toret.name().toLowerCase()));
 
     } /*
        * catch (IllegalArgumentException e) {

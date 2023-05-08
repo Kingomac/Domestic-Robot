@@ -1,7 +1,10 @@
 package house;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Stream;
 
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
@@ -35,7 +38,6 @@ public class HouseModel extends GridWorldModel {
     int dishwasherCount = 0;
     int cupboardCount = 0;
     List<Location> trash = new LinkedList<>(); // localización de la basura del mapa
-    List<Location> walls = new LinkedList<>();
 
     public HouseModel() {
         /**
@@ -58,26 +60,19 @@ public class HouseModel extends GridWorldModel {
         }
 
         // inicializar muros
-        for (int i = 0; i < 15; i++) {
+        Random rm = new Random();
+        int numMuros = 7 + rm.nextInt(3);
+
+        for (int i = 0; i < numMuros; i++) {
             int posX = 3;
             int posY = 2;
 
             do {
-                posX = (int) Math.round(Math.random() * (GSize - 1));
-                posY = (int) Math.round(Math.random() * (GSize - 1));
+                posX = 2 + (int) Math.round(Math.random() * (GSize - 5));
+                posY = 2 + (int) Math.round(Math.random() * (GSize - 5));
             } while (isPlace(posX, posY) || !isFree(posX, posY));
-            walls.add(new Location(posX, posY));
             addWall(posX, posY, posX, posY);
         }
-        addWall(4, 6, 7, 6);
-    }
-
-    public boolean isWall(Location l) {
-        return walls.contains(l);
-    }
-
-    public boolean isWall(int x, int y) {
-        return walls.contains(new Location(x, y));
     }
 
     public boolean isThereOtherRobot(SpecializedRobots me, Location loc) {
@@ -407,6 +402,23 @@ public class HouseModel extends GridWorldModel {
         if (view != null)
             view.update(Places.DISHWASHER.x, Places.DISHWASHER.y);
         return true;
+    }
+
+    public boolean robotCanGo(SpecializedRobots me, Location pos) {
+        for (Location t : trash) {
+            if (t.equals(pos))
+                return false;
+        }
+        for (Places p : Places.values()) {
+            if (p.location.equals(pos) && !p.canGoThrough)
+                return false;
+        }
+        return (isFreeOfObstacle(pos) && !isThereOtherRobot(me, pos));
+    }
+
+    public boolean robotCanGo(SpecializedRobots me, int posX, int posY) {
+        Location loc = new Location(posX, posY);
+        return robotCanGo(me, loc);
     }
 
 }

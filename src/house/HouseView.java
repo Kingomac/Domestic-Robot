@@ -28,7 +28,8 @@ public class HouseView extends GridWorldView {
         switch (object) {
             case HouseModel.FRIDGE:
                 g.setColor(Color.black);
-                drawString(g, x, y, defaultFont, "Fridge (" + hmodel.availableBeers + ")");
+                drawString(g, x, y, new Font("Arial", Font.BOLD, 11000 / WINDOW_SIZE),
+                        "Fridge B=" + hmodel.availableBeers + "P=" + hmodel.availablePinchos);
                 break;
             case HouseModel.OWNER:
                 String o = "Owner";
@@ -41,7 +42,7 @@ public class HouseView extends GridWorldView {
             case HouseModel.BIN:
                 super.drawAgent(g, x, y, new Color(139, 69, 19), -1);
                 g.setColor(Color.white);
-                drawString(g, x, y, defaultFont, String.format("Bin (%d)", hmodel.binCount));
+                drawString(g, x, y, defaultFont, String.format("Bin (%d/5)", hmodel.binCount));
                 break;
 
             case HouseModel.TRASH:
@@ -69,14 +70,14 @@ public class HouseView extends GridWorldView {
                 if (hmodel.dishwasherState.equals(DishwasherStates.ON)) {
                     dishwasherM = "**Dishwasher**";
                 } else {
-                    dishwasherM = String.format("Dishwasher (%d)", hmodel.dishwasherCount);
+                    dishwasherM = String.format("Dishwasher %d/5", hmodel.dishwasherCount);
                 }
                 drawString(g, x, y, defaultFont, dishwasherM);
                 break;
             case HouseModel.CUPBOARD:
                 super.drawAgent(g, x, y, new Color(179, 129, 43), -1);
                 g.setColor(Color.black);
-                drawString(g, x, y, defaultFont, String.format("Cupboard (%d)", hmodel.cupboardCount));
+                drawString(g, x, y, defaultFont, String.format("Cupboard %d/8", hmodel.cupboardCount));
                 break;
         }
     }

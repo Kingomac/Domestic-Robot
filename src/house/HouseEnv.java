@@ -65,10 +65,6 @@ public class HouseEnv extends Environment {
 
     /** creates the agents percepts based on the HouseModel */
     void updatePercepts() {
-
-        PathFinder a = new PathFinder(model);
-        a.getNextPosition(new Location(5, 6), new Location(10, 8), null);
-
         // clear the percepts of the agents
         clearPercepts("robot");
         clearPercepts("owner");

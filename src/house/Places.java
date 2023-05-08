@@ -13,9 +13,9 @@ enum Places {
   DELIVERY(new Location(0, HouseModel.GSize - 1), HouseModel.DELIVERY),
   DISHWASHER(new Location(2, 0), HouseModel.DISHWASHER),
   CUPBOARD(new Location(4, 0), HouseModel.CUPBOARD),
-  BASE_ROBOT(new Location(HouseModel.GSize / 2, HouseModel.GSize / 2), -1, 0),
-  BASE_CLEANER(new Location(HouseModel.GSize / 2 - 1, HouseModel.GSize - 1), -1, 0),
-  BASE_STOREKEEPER(new Location(HouseModel.GSize / 2 + 1, HouseModel.GSize - 1), -1, 0);
+  BASE_ROBOT(new Location(HouseModel.GSize / 2, HouseModel.GSize / 2), -1, 0, true),
+  BASE_CLEANER(new Location(HouseModel.GSize / 2 - 1, HouseModel.GSize - 1), -1, 0, true),
+  BASE_STOREKEEPER(new Location(HouseModel.GSize / 2 + 1, HouseModel.GSize - 1), -1, 0, true);
 
   public Location location;
   public Location robotLoc;
@@ -23,6 +23,7 @@ enum Places {
   public int y;
   public final int gridConst;
   public final int minDist;
+  public final boolean canGoThrough;
 
   private Places(Location loc) {
     location = loc;
@@ -30,6 +31,7 @@ enum Places {
     x = loc.x;
     y = loc.y;
     minDist = 1;
+    canGoThrough = false;
   }
 
   private Places(Location loc, int gridConst) {
@@ -38,6 +40,7 @@ enum Places {
     x = loc.x;
     y = loc.y;
     minDist = 1;
+    canGoThrough = false;
   }
 
   private Places(Location loc, int gridConst, int minDist) {
@@ -46,6 +49,16 @@ enum Places {
     x = loc.x;
     y = loc.y;
     this.minDist = minDist;
+    canGoThrough = false;
+  }
+
+  private Places(Location loc, int gridConst, int minDist, boolean canGoThrough) {
+    location = loc;
+    this.gridConst = gridConst;
+    x = loc.x;
+    y = loc.y;
+    this.minDist = minDist;
+    this.canGoThrough = canGoThrough;
   }
 
   /**
