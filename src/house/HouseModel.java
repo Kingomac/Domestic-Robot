@@ -1,119 +1,38 @@
+package house;
+
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Stream;
 
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
-
-/*
- * Identificación de los distintos robots
- */
-enum SpecializedRobots {
-    ROBOT(0),
-    CLEANER(1),
-    STOREKEEPER(2);
-
-    private final int value;
-
-    private SpecializedRobots(int v) {
-        this.value = v;
-    }
-
-    public int getValue() {
-        return value;
-    }
-}
-
-/*
- * Identificación de los lugares fijos del grid
- */
-enum Places {
-    FRIDGE(new Location(0, 0), HouseModel.FRIDGE),
-    OWNER(new Location(HouseModel.GSize - 1, HouseModel.GSize - 1), HouseModel.OWNER),
-    // OWNER_MUSK(new Location(HouseModel.GSize / 2, 0), HouseModel.OWNER_MUSK),
-    BIN(new Location(HouseModel.GSize - 1, 0), HouseModel.BIN),
-    DELIVERY(new Location(0, HouseModel.GSize - 1), HouseModel.DELIVERY),
-    DISHWASHER(new Location(2, 0), HouseModel.DISHWASHER),
-    CUPBOARD(new Location(4, 0), HouseModel.CUPBOARD),
-    BASE_ROBOT(new Location(HouseModel.GSize / 2, HouseModel.GSize / 2), -1, 0),
-    BASE_CLEANER(new Location(HouseModel.GSize / 2 - 1, HouseModel.GSize - 1), -1, 0),
-    BASE_STOREKEEPER(new Location(HouseModel.GSize / 2 + 1, HouseModel.GSize - 1), -1, 0);
-
-    public Location location;
-    public int x;
-    public int y;
-    public final int gridConst;
-    public final int minDist;
-
-    private Places(Location loc) {
-        location = loc;
-        gridConst = -1;
-        x = loc.x;
-        y = loc.y;
-        minDist = 1;
-    }
-
-    private Places(Location loc, int gridConst) {
-        location = loc;
-        this.gridConst = gridConst;
-        x = loc.x;
-        y = loc.y;
-        minDist = 1;
-    }
-
-    private Places(Location loc, int gridConst, int minDist) {
-        location = loc;
-        this.gridConst = gridConst;
-        x = loc.x;
-        y = loc.y;
-        this.minDist = minDist;
-    }
-
-    /**
-     * Cambia la localización actualizando los parámetros x, y y location
-     * 
-     * @param loc nueva localización
-     */
-    public void setLocation(Location loc) {
-        location = loc;
-        x = loc.x;
-        y = loc.y;
-    }
-
-    /**
-     * Cambia la localización actualizando los parámetros x, y y location
-     * 
-     * @param x
-     * @param y
-     */
-    public void setLocation(int x, int y) {
-        this.x = location.x = x;
-        this.y = location.y = y;
-    }
-
-}
+import movement.MovementDirections;
 
 /** class that implements the Model of Domestic Robot application */
 public class HouseModel extends GridWorldModel {
 
-    public static final int GSize = 12; // Grid size
+    public static final int GSize = 11; // Grid size
     public static final int FRIDGE = 16; // Capa Fridge
     public static final int OWNER = 32; // Capa Owner
     public static final int BIN = 64; // Capa Bin
     public static final int TRASH = 128; // Capa Trash
     public static final int DELIVERY = 256; // Capa Delivery
-    public static final int OWNER_MUSK = 512; // Owner Capa Musk
-    public static final int DISHWASHER = 1024; // Capa dishwasher
-    public static final int CUPBOARD = 2048; // Capa cupboard
+    public static final int DISHWASHER = 512; // Capa dishwasher
+    public static final int CUPBOARD = 1024; // Capa cupboard
 
     boolean fridgeOpen = false; // si la nevera está abierta
     boolean carryingBeer = false; // si el mayordomo está llevando cerveza
     boolean carryingTrash = false; // si el cleaner está llevando basura
     boolean carryingDelivery = false; // si el storekeeper está llevando una entrega
+    boolean burningTrash = false;
     DishwasherStates dishwasherState = DishwasherStates.OFF;
     int carryingDish = 0; // si el robot está llevando un plato limpio o sucio
     int sipCount = 0; // how many sip the owner did
     int sipCountMusk = 0;
     int availableBeers = 1; // cervezas en la nevera
+    int availablePinchos = 1; // pinchos en la nevera
     int deliveryBeers = 0; // cervezas en la zona delivery
     int binCount = 0; // núm. cervezas en la papelera
     int dishwasherCount = 0;
@@ -130,9 +49,8 @@ public class HouseModel extends GridWorldModel {
         super(GSize, GSize, SpecializedRobots.values().length); // (tamaño, tamaño, número de agentes móviles)
 
         // inicializar posiciones de los robots
-        setAgPos(SpecializedRobots.ROBOT.getValue(), GSize / 2, GSize / 2);
-        setAgPos(SpecializedRobots.CLEANER.getValue(), Places.BASE_CLEANER.location);
-        setAgPos(SpecializedRobots.STOREKEEPER.getValue(), Places.BASE_STOREKEEPER.location);
+        for (SpecializedRobots rob : SpecializedRobots.values())
+            setAgPos(rob.getValue(), rob.base.x, rob.base.y);
 
         // inicializar elementos no móviles
         for (Places val : Places.values()) {
@@ -141,7 +59,37 @@ public class HouseModel extends GridWorldModel {
         }
 
         // inicializar muros
-        // addWall(2, 5, 3, 5);
+        Random rm = new Random();
+        int numMuros = 7 + rm.nextInt(3);
+
+        for (int i = 0; i < numMuros; i++) {
+            int posX = 3;
+            int posY = 2;
+
+            do {
+                posX = 2 + (int) Math.round(Math.random() * (GSize - 5));
+                posY = 2 + (int) Math.round(Math.random() * (GSize - 5));
+            } while (isPlace(posX, posY) || !isFree(posX, posY));
+            addWall(posX, posY, posX, posY);
+        }
+    }
+
+    public boolean isThereOtherRobot(SpecializedRobots me, Location loc) {
+
+        for (SpecializedRobots rob : SpecializedRobots.values()) {
+            Location pos = getAgPos(rob.getValue());
+            if (rob.equals(me))
+                continue;
+            if (pos.equals(loc))
+                return true;
+        }
+        return false;
+        // int ag = getAgAtPos(loc);
+        // return ag != -1 && ag != me.getValue();
+    }
+
+    public boolean isThereOtherRobot(SpecializedRobots me, int x, int y) {
+        return isThereOtherRobot(me, new Location(x, y));
     }
 
     /**
@@ -172,6 +120,7 @@ public class HouseModel extends GridWorldModel {
     boolean getBeer() {
         if (availableBeers > 0) {
             availableBeers--;
+            availablePinchos--;
             carryingBeer = true;
             if (view != null)
                 view.update(Places.FRIDGE.x, Places.FRIDGE.y);
@@ -241,6 +190,7 @@ public class HouseModel extends GridWorldModel {
      */
     boolean saveBeer() {
         availableBeers += 3; // Deja 2 y se queda 1 (en total 3)
+        availablePinchos += 3;
         carryingDelivery = false;
         if (view != null)
             view.update(Places.DELIVERY.x, Places.DELIVERY.y);
@@ -286,7 +236,7 @@ public class HouseModel extends GridWorldModel {
      * @param y
      * @return true si es un lugar, false si no lo es
      */
-    private boolean isPlace(int x, int y) {
+    public boolean isPlace(int x, int y) {
         Location loc = new Location(x, y);
         for (Places p : Places.values()) {
             if (loc.equals(p.location))
@@ -347,6 +297,8 @@ public class HouseModel extends GridWorldModel {
             return false;
         carryingTrash = false;
         binCount++;
+        if (view != null)
+            view.update(Places.BIN.x, Places.BIN.y);
         return true;
     }
 
@@ -357,19 +309,42 @@ public class HouseModel extends GridWorldModel {
      * @param dest localización del destino
      * @return
      */
-    boolean moveRobot(SpecializedRobots tipo, Location dest) {
+    boolean moveRobot(SpecializedRobots tipo, String dest) {
         Location origen = getAgPos(tipo.getValue());
 
-        if (origen.x < dest.x)
-            origen.x++;
-        else if (origen.x > dest.x)
-            origen.x--;
-        if (origen.y < dest.y)
-            origen.y++;
-        else if (origen.y > dest.y)
+        if (dest.equals("up")) {
             origen.y--;
+        } else if (dest.equals("down")) {
+            origen.y++;
+        } else if (dest.equals("left")) {
+            origen.x--;
+        } else {
+            origen.x++;
+        }
 
         setAgPos(tipo.getValue(), origen);
+        return true;
+    }
+
+    boolean moveRobot(SpecializedRobots tipo, MovementDirections dir) {
+        Location origen = getAgPos(tipo.getValue());
+
+        if (dir.equals(MovementDirections.UP))
+            origen.y--;
+        else if (dir.equals(MovementDirections.DOWN))
+            origen.y++;
+        else if (dir.equals(MovementDirections.LEFT))
+            origen.x--;
+        else if (dir.equals(MovementDirections.RIGHT))
+            origen.x++;
+
+        setAgPos(tipo.getValue(), origen);
+        return true;
+    }
+
+    boolean moveRobot(SpecializedRobots tipo, Location dest) {
+
+        setAgPos(tipo.getValue(), dest);
         return true;
     }
 
@@ -380,7 +355,12 @@ public class HouseModel extends GridWorldModel {
      */
     boolean emptyBin() {
         binCount = 0;
-        carryingTrash = true;
+        burningTrash = true;
+        if (view != null) {
+            Location rob = getAgPos(SpecializedRobots.BURNER.getValue());
+            view.update(rob.x, rob.y);
+            view.update(Places.BIN.x, Places.BIN.y);
+        }
         return true;
     }
 
@@ -391,6 +371,11 @@ public class HouseModel extends GridWorldModel {
      */
     boolean dropBin() {
         carryingTrash = false;
+        burningTrash = false;
+        if (view != null) {
+            Location rob = getAgPos(SpecializedRobots.BURNER.getValue());
+            view.update(rob.x, rob.y);
+        }
         return true;
     }
 
@@ -428,6 +413,23 @@ public class HouseModel extends GridWorldModel {
         if (view != null)
             view.update(Places.DISHWASHER.x, Places.DISHWASHER.y);
         return true;
+    }
+
+    public boolean robotCanGo(SpecializedRobots me, Location pos) {
+        for (Location t : trash) {
+            if (t.equals(pos))
+                return false;
+        }
+        for (Places p : Places.values()) {
+            if (p.location.equals(pos) && !p.canGoThrough)
+                return false;
+        }
+        return (isFreeOfObstacle(pos) && !isThereOtherRobot(me, pos));
+    }
+
+    public boolean robotCanGo(SpecializedRobots me, int posX, int posY) {
+        Location loc = new Location(posX, posY);
+        return robotCanGo(me, loc);
     }
 
 }

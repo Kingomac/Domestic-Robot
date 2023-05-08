@@ -1,6 +1,13 @@
+package house;
+
 import jason.asSyntax.*;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
+import movement.MovementDirections;
+import movement.NextDirection;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 enum DishwasherStates {
@@ -11,7 +18,7 @@ enum DishwasherStates {
 
 public class HouseEnv extends Environment {
 
-    private int dishwasherCycles = 20;
+    private int dishwasherCycles = 10;
 
     // common literals
     public static final Literal of = Literal.parseLiteral("open(fridge)");
@@ -29,11 +36,21 @@ public class HouseEnv extends Environment {
 
     static Logger logger = Logger.getLogger(HouseEnv.class.getName());
 
-    HouseModel model; // the model of the grid
+    private HouseModel model; // the model of the grid
+    private Map<String, Double> precioProveedor;
+    private double[] priceMultipliers = { 0.992, 0.997, 1.002, 1.004 };
 
     @Override
     public void init(String[] args) {
         model = new HouseModel();
+        NextDirection.initialize(model);
+        precioProveedor = new HashMap<>();
+        precioProveedor.put("mahou", 1.0);
+        precioProveedor.put("estrella", 1.5);
+        precioProveedor.put("skoll", 0.5);
+        precioProveedor.put("tortilla", 2.5);
+        precioProveedor.put("durum", 5.0);
+        precioProveedor.put("empanada", 7.0);
 
         if (args.length == 1 && args[0].equals("gui")) {
             HouseView view = new HouseView(model);
@@ -49,6 +66,8 @@ public class HouseEnv extends Environment {
         clearPercepts("robot");
         clearPercepts("owner");
         clearPercepts("owner_musk");
+        clearPercepts("supermarket_mercadona");
+        clearPercepts("supermarket_lidl");
 
         /*
          * Código para meterle percepts de a dónde pueden ir
@@ -105,7 +124,7 @@ public class HouseEnv extends Environment {
         }
 
         // Detecta si el cubo de basura está llena
-        if (model.binCount >= 2)
+        if (model.binCount >= 5)
             addPercept("robot", Literal.parseLiteral("bin(full)"));
 
         // El robot cuando está en la nevera puede ver cuantas cervezas quedan
@@ -148,6 +167,13 @@ public class HouseEnv extends Environment {
             model.dishwasherState = DishwasherStates.OFF;
         }
 
+        precioProveedor.forEach((key, val) -> {
+            double r = priceMultipliers[(int) Math.floor(Math.random() * priceMultipliers.length)];
+            precioProveedor.put(key, val * r);
+            addPercept("supermarket_mercadona", Literal.parseLiteral(String.format("proveedor(%s, %f)", key, val * r)));
+            addPercept("supermarket_lidl", Literal.parseLiteral(String.format("proveedor(%s, %f)", key, val * r)));
+        });
+
     }
 
     @Override
@@ -160,44 +186,14 @@ public class HouseEnv extends Environment {
         } else if (action.equals(clf)) { // clf = close(fridge)
             result = model.closeFridge();
 
+        } else if (action.getFunctor().equals("next_direction")) {
         } else if (action.getFunctor().equals("move_robot")) {
             String robot = action.getTerm(0).toString();
-            /*
-             * int x = Integer.parseInt(action.getTerm(1).toString());
-             * int y = Integer.parseInt(action.getTerm(2).toString());
-             * SpecializedRobots tipo;
-             * 
-             * if (robot.equals("cleaner"))
-             * tipo = SpecializedRobots.CLEANER;
-             * else if (robot.equals("storekeeper"))
-             * tipo = SpecializedRobots.STOREKEEPER;
-             * else if (robot.equals("robot"))
-             * tipo = SpecializedRobots.ROBOT;
-             * else {
-             * System.out.
-             * println("MOVE_ROBOT OF UNRECOGNIZED ROBOT. Check the move_robot functor at HouseEnv.java"
-             * );
-             * return false;
-             * }
-             * 
-             * result = model.moveRobot(tipo, new Location(x, y));
-             */
 
             SpecializedRobots tipo;
-
-            if (robot.equals("cleaner"))
-                tipo = SpecializedRobots.CLEANER;
-            else if (robot.equals("storekeeper"))
-                tipo = SpecializedRobots.STOREKEEPER;
-            else if (robot.equals("robot"))
-                tipo = SpecializedRobots.ROBOT;
-            else {
-                System.out.println("MOVE_ROBOT OF UNRECOGNIZED ROBOT. Check the move_robot functor at HouseEnv.java");
-                return false;
-            }
-            int x = Integer.parseInt(action.getTerm(1).toString());
-            int y = Integer.parseInt(action.getTerm(2).toString());
-            result = model.moveRobot(tipo, new Location(x, y));
+            tipo = SpecializedRobots.from(robot);
+            MovementDirections dir = MovementDirections.from(action.getTerm(1).toString().toUpperCase());
+            result = model.moveRobot(tipo, dir);
 
         } else if (action.equals(gb)) {
             result = model.getBeer();
@@ -211,16 +207,14 @@ public class HouseEnv extends Environment {
 
         } else if (action.equals(sb)) {
             result = model.sipBeer();
-            //////
         } else if (action.equals(Literal.parseLiteral("sip_musk(beer)"))) {
             result = model.sipBeerMusk();
+        } else if (action.equals(dropTrash)) {
+            result = model.dropTrash();
         } else if (action.equals(db)) {
             result = model.dropBeer();
         } else if (action.equals(takeTrash)) {
             result = model.takeTrash();
-        } else if (action.equals(dropTrash)) {
-            result = model.dropTrash();
-            //////
         } else if (action.equals(litGetDelivery) && ag.equals("robot")) {
             result = model.getDelivered();
         } else if (action.equals(litSaveBeer) && ag.equals("robot")) {
@@ -240,7 +234,7 @@ public class HouseEnv extends Environment {
             result = model.dropBin();
         } else if (action.equals(Literal.parseLiteral("put(dish,dishwasher)"))) {
             result = model.putDishInDishwasher();
-            dishwasherCycles += 10;
+            dishwasherCycles += 5;
         } else if (action.equals(Literal.parseLiteral("put(dish,cupboard)"))) {
             result = model.putDishInCupboard();
         } else if (action.equals(Literal.parseLiteral("get(dish,dishwasher)"))) {

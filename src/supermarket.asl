@@ -3,42 +3,57 @@
 /** Multiplicadores del precio **/
 price_rise(S + 1.1) :- .random(S).
 price_lower(0.999 - S * 0.1) :- .random(S).
+profit(S + 1) :- .random(S).
+product(mahou).
+product(estrella).
+product(skoll).
+product(tortilla).
+product(empanada).
+product(durum).
 
 last_order_id(1). // initial belief
 
 /** Inicializar supermercado con variables aleatorias **/
 !start.
-+!start : true <- .random(P); +price(beer, (P + 1) * 20); .send(robot, tell, price(beer,P));
+
++!start : true <-
 		.random(M); +money((M + 100) * 1000);
-		.random(S); +stock(beer, math.round((S + 1) * 5));
-		+initial_price((P + 1) * 20); !make_discount.
+		.wait(100);
+		for(product(Prod)) {
+			.wait(proveedor(Prod,_));
+			?proveedor(Prod, Precio);
+			?profit(Profit);
+			.random(S);
+			+offer(Prod,Precio * Profit, 1);//math.round((S + 1) * 5));
+			.send(robot, tell, offer(Prod,Precio * Profit, math.round((S + 1) * 5)));
+		}.
+
 
 /** Cada cierto tiempo hace un descuento **/
 +!make_discount : price_lower(Mult) <-
 		.wait(10000);
 		?price(beer, P);
 		-+price(beer, P * Mult);
-		!make_discount.
-
-+!inquire(beer, price)[source(Ag)] : price(beer, P) <- .send(Ag, tell, price(beer,P)). 
+		!make_discount. 
 
 // plan to achieve the goal "order" for agent Ag
-+!order(Product,Qtd)[source(Ag)] : stock(beer, Numero_cerves) & Numero_cerves >= Qtd
++!order(Product,Qtd)[source(Ag)] : offer(Product, Precio, Stock) & Stock >= Qtd
   <- ?last_order_id(N);
      OrderId = N + 1;
      -+last_order_id(OrderId);
-	 +stock(beer, Numero_cerves - Qtd);
-	 -stock(beer, Numero_cerves);
+	 -+offer(Product, Precio, Stock - Qtd);
      deliver(Product,Qtd);
      .send(Ag, tell, delivered(Product,Qtd,OrderId)).
 	 
 +!order(Product,Qtd)[source(Ag)] : true 
-   <- 	?stock(beer, Numero_cerves);
-   		.print("Lo siento, solo nos quedan " , Numero_cerves, " estrellas");
-		.send(Ag,tell,stock(Numero_cerves)).
+   <- 	?offer(Product, Precio, Numero_cerves);
+   		.print("Lo siento, solo nos quedan " , Numero_cerves, " ", Product);
+		.send(Ag,tell,stock(Product, Numero_cerves)).
 		
 /** Si se queda sin stock lo recarga **/
-+stock(beer, P) : P <= 3 & money(M) <- -+money(beer, M - 50);  -+stock(beer, P + 5).
++offer(Producto, Precio, Cantidad) : Cantidad <= 0 & 
+	money(Money) & proveedor(Producto, PrecioProv) & Money >= PrecioProv <-
+	-+money(Money - PrecioProv * 10); ?profit(Profit); -+offer(Producto, PrecioProv * Profit, Cantidad + 10).
 
 /** Cuando recibe un pago incrementa el precio de la cerveza **/
 +payment(_, _, P) : money(M) & price_rise(MULT) <- -+money(P + M); -+price(beer, P * MULT).

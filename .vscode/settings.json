@@ -1,6 +1,20 @@
 {
-  "java.project.sourcePaths": [ "src" ],
-  "java.project.referencedLibraries": [
-    "libs/*.jar",
-  ]
+  "java.project.sourcePaths": ["src"],
+  "java.project.referencedLibraries": {
+    "include": [
+      "libs/*.jar"
+    ],
+    "exclude": [
+      "libs/antlr4-runtime-4.8-1.jar",
+      "libs/commons-lang3-3.9.jar",
+      "libs/commons-math3-3.6.1.jar",
+      "libs/commons-text-1.8.jar",
+      "libs/dsiutils-2.6.17.jar",
+      "libs/fastutil-8.5.2.jar",
+      "libs/guava-29.0-jre.jar",
+      "libs/javax.json-api-1.1.4.jar",
+      "libs/javax.json-1.1.4.jar",
+      "libs/jgraphx-4.1.0.jar"
+    ]
+  }
 }
