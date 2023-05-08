@@ -19,14 +19,14 @@ public class HouseModel extends GridWorldModel {
     public static final int BIN = 64; // Capa Bin
     public static final int TRASH = 128; // Capa Trash
     public static final int DELIVERY = 256; // Capa Delivery
-    public static final int OWNER_MUSK = 512; // Owner Capa Musk
-    public static final int DISHWASHER = 1024; // Capa dishwasher
-    public static final int CUPBOARD = 2048; // Capa cupboard
+    public static final int DISHWASHER = 512; // Capa dishwasher
+    public static final int CUPBOARD = 1024; // Capa cupboard
 
     boolean fridgeOpen = false; // si la nevera está abierta
     boolean carryingBeer = false; // si el mayordomo está llevando cerveza
     boolean carryingTrash = false; // si el cleaner está llevando basura
     boolean carryingDelivery = false; // si el storekeeper está llevando una entrega
+    boolean burningTrash = false;
     DishwasherStates dishwasherState = DishwasherStates.OFF;
     int carryingDish = 0; // si el robot está llevando un plato limpio o sucio
     int sipCount = 0; // how many sip the owner did
@@ -49,9 +49,8 @@ public class HouseModel extends GridWorldModel {
         super(GSize, GSize, SpecializedRobots.values().length); // (tamaño, tamaño, número de agentes móviles)
 
         // inicializar posiciones de los robots
-        setAgPos(SpecializedRobots.ROBOT.getValue(), GSize / 2, GSize / 2);
-        setAgPos(SpecializedRobots.CLEANER.getValue(), Places.BASE_CLEANER.location);
-        setAgPos(SpecializedRobots.STOREKEEPER.getValue(), Places.BASE_STOREKEEPER.location);
+        for (SpecializedRobots rob : SpecializedRobots.values())
+            setAgPos(rob.getValue(), rob.base.x, rob.base.y);
 
         // inicializar elementos no móviles
         for (Places val : Places.values()) {
@@ -298,6 +297,8 @@ public class HouseModel extends GridWorldModel {
             return false;
         carryingTrash = false;
         binCount++;
+        if (view != null)
+            view.update(Places.BIN.x, Places.BIN.y);
         return true;
     }
 
@@ -354,7 +355,12 @@ public class HouseModel extends GridWorldModel {
      */
     boolean emptyBin() {
         binCount = 0;
-        carryingTrash = true;
+        burningTrash = true;
+        if (view != null) {
+            Location rob = getAgPos(SpecializedRobots.BURNER.getValue());
+            view.update(rob.x, rob.y);
+            view.update(Places.BIN.x, Places.BIN.y);
+        }
         return true;
     }
 
@@ -365,6 +371,11 @@ public class HouseModel extends GridWorldModel {
      */
     boolean dropBin() {
         carryingTrash = false;
+        burningTrash = false;
+        if (view != null) {
+            Location rob = getAgPos(SpecializedRobots.BURNER.getValue());
+            view.update(rob.x, rob.y);
+        }
         return true;
     }
 

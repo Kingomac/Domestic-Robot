@@ -1,16 +1,13 @@
 package house;
 
-import jason.asSemantics.Unifier;
 import jason.asSyntax.*;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
 import movement.MovementDirections;
-import movement.PathFinder;
 import movement.NextDirection;
 
-import java.util.Random;
-
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 enum DishwasherStates {
@@ -40,7 +37,7 @@ public class HouseEnv extends Environment {
     static Logger logger = Logger.getLogger(HouseEnv.class.getName());
 
     private HouseModel model; // the model of the grid
-    private HashMap<String, Double> precioProveedor;
+    private Map<String, Double> precioProveedor;
     private double[] priceMultipliers = { 0.992, 0.997, 1.002, 1.004 };
 
     @Override
@@ -127,7 +124,7 @@ public class HouseEnv extends Environment {
         }
 
         // Detecta si el cubo de basura está llena
-        if (model.binCount >= 2)
+        if (model.binCount >= 5)
             addPercept("robot", Literal.parseLiteral("bin(full)"));
 
         // El robot cuando está en la nevera puede ver cuantas cervezas quedan
@@ -194,17 +191,7 @@ public class HouseEnv extends Environment {
             String robot = action.getTerm(0).toString();
 
             SpecializedRobots tipo;
-
-            if (robot.equals("cleaner"))
-                tipo = SpecializedRobots.CLEANER;
-            else if (robot.equals("storekeeper"))
-                tipo = SpecializedRobots.STOREKEEPER;
-            else if (robot.equals("robot"))
-                tipo = SpecializedRobots.ROBOT;
-            else {
-                System.out.println("MOVE_ROBOT OF UNRECOGNIZED ROBOT. Check the move_robot functor at HouseEnv.java");
-                return false;
-            }
+            tipo = SpecializedRobots.from(robot);
             MovementDirections dir = MovementDirections.from(action.getTerm(1).toString().toUpperCase());
             result = model.moveRobot(tipo, dir);
 
@@ -220,16 +207,14 @@ public class HouseEnv extends Environment {
 
         } else if (action.equals(sb)) {
             result = model.sipBeer();
-            //////
         } else if (action.equals(Literal.parseLiteral("sip_musk(beer)"))) {
             result = model.sipBeerMusk();
+        } else if (action.equals(dropTrash)) {
+            result = model.dropTrash();
         } else if (action.equals(db)) {
             result = model.dropBeer();
         } else if (action.equals(takeTrash)) {
             result = model.takeTrash();
-        } else if (action.equals(dropTrash)) {
-            result = model.dropTrash();
-            //////
         } else if (action.equals(litGetDelivery) && ag.equals("robot")) {
             result = model.getDelivered();
         } else if (action.equals(litSaveBeer) && ag.equals("robot")) {

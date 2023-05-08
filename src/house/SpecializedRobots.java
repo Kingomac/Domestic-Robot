@@ -9,9 +9,10 @@ import java.util.stream.Collectors;
  * Identificación de los distintos robots
  */
 public enum SpecializedRobots {
-  ROBOT(0),
-  CLEANER(1),
-  STOREKEEPER(2);
+  ROBOT(0, Places.BASE_ROBOT),
+  CLEANER(1, Places.BASE_CLEANER),
+  STOREKEEPER(2, Places.BASE_STOREKEEPER),
+  BURNER(3, Places.BASE_BURNER);
 
   private static final Map<String, SpecializedRobots> STRING_MAP = Arrays.stream(SpecializedRobots.values())
       .collect(Collectors.toMap(SpecializedRobots::name, Function.identity()));
@@ -24,9 +25,11 @@ public enum SpecializedRobots {
   }
 
   private final int value;
+  public final Places base;
 
-  private SpecializedRobots(int v) {
+  private SpecializedRobots(int v, Places base) {
     this.value = v;
+    this.base = base;
   }
 
   public int getValue() {

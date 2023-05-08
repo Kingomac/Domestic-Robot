@@ -2,7 +2,6 @@
 
 // my owner should not consume more than 10 beers a day :-)
 limit(beer,5).
-free(cleaner). // el cleaner no está ocupado
 
 money(0). // el robot no tiene dinero
 
@@ -148,17 +147,15 @@ terminar para llevarle cerveza a otro **/
 /** Gestión si el supermercado tiene menos de 3 cervezas **/
 //+stock(Prod, Num)[source(S)] <- .send(S, achieve, order(Prod, Num)).
 
-/** Código cleaner. Si no está ocupado vacía la papelera o recoge basura si hay **/
-+bin(full) <- .wait(free(cleaner)); -free(cleaner); !take_out_trash; +free(cleaner).
-+where(trash, A, B) <- .wait(free(cleaner)); -free(cleaner); !clean_trash; +free(cleaner).
-+free(cleaner) <- !go_to(cleaner, cleaner_base).
--free(cleaner) <- .drop_intention(go_to(cleaner,cleaner_base)).
+/** Burner **/
+!take_out_trash.
++!take_out_trash: bin(full) <- !go_to(burner, bin); empty(bin); .wait(5000); drop(bin); !take_out_trash.
++!take_out_trash: true <- !go_to(burner, base_burner); .wait({ +bin(full) }); !take_out_trash.
 
-+!take_out_trash <- !go_to(cleaner, bin); empty(bin); !go_to(cleaner, delivery); drop(bin). 
-
-+!clean_trash : not where(trash, _, _) <- true.
-+!clean_trash : not bin(full) <- !go_to(cleaner, trash); take(trash); !go_to(cleaner, bin); drop(trash).
--!clean_trash <- true.//.wait(1500); !clean_trash.
+/** Cleaner. Recoge basura si hay **/
+!clean_trash.
++!clean_trash: where(trash, _, _) <- !go_to(cleaner, trash); take(trash); !go_to(cleaner, bin); drop(trash); !clean_trash. 
++!clean_trash: true <- !go_to(cleaner, base_cleaner); .wait({ +where(trash,_,_) }); !clean_trash.
 
 /** Movimiento simple en diagonal **/
 +!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait(where(Sitio, _, _)); !go_to(Tipo, Sitio).

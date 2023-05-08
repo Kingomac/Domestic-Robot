@@ -42,7 +42,7 @@ public class HouseView extends GridWorldView {
             case HouseModel.BIN:
                 super.drawAgent(g, x, y, new Color(139, 69, 19), -1);
                 g.setColor(Color.white);
-                drawString(g, x, y, defaultFont, String.format("Bin (%d/5)", hmodel.binCount));
+                drawString(g, x, y, defaultFont, String.format("Bin %d/5", hmodel.binCount));
                 break;
 
             case HouseModel.TRASH:
@@ -54,14 +54,6 @@ public class HouseView extends GridWorldView {
                 super.drawAgent(g, x, y, Color.green, -1);
                 g.setColor(Color.black);
                 drawString(g, x, y, defaultFont, "Delivery");
-                break;
-            case HouseModel.OWNER_MUSK:
-                String m = "Musk";
-                if (hmodel.sipCountMusk > 0) {
-                    m += " (" + hmodel.sipCountMusk + ")";
-                }
-                g.setColor(Color.black);
-                drawString(g, x, y, defaultFont, m);
                 break;
             case HouseModel.DISHWASHER:
                 super.drawAgent(g, x, y, new Color(92, 158, 224), -1);
@@ -95,6 +87,7 @@ public class HouseView extends GridWorldView {
         Location lRobot = hmodel.getAgPos(SpecializedRobots.ROBOT.getValue());
         Location lCleaner = hmodel.getAgPos(SpecializedRobots.CLEANER.getValue());
         Location lStorekeeper = hmodel.getAgPos(SpecializedRobots.STOREKEEPER.getValue());
+        Location lBurner = hmodel.getAgPos(SpecializedRobots.BURNER.getValue());
 
         if (x == lRobot.x && y == lRobot.y) { // Dibujar robot mayordomo
             if (!lRobot.equals(Places.OWNER.location) && !lRobot.equals(Places.FRIDGE.location)) {
@@ -121,6 +114,14 @@ public class HouseView extends GridWorldView {
             super.drawAgent(g, x, y, c, -1);
             g.setColor(Color.black);
             super.drawString(g, x, y, defaultFont, "Storekeeper");
+        } else if (x == lBurner.x && y == lBurner.y) {
+            c = Color.green;
+            if (hmodel.burningTrash) {
+                c = Color.red;
+            }
+            super.drawAgent(g, x, y, c, -1);
+            g.setColor(Color.black);
+            super.drawString(g, x, y, defaultFont, "Burner");
         }
 
     }
