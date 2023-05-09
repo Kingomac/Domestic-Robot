@@ -30,6 +30,7 @@ favorite(pincho, durum).
    <- .send(robot, tell, plate(dirty)).
 +!drink(beer) //: has(owner,beer)
    <- sip(beer);
+   	  nam(pincho);
      !drink(beer).
 -!drink(beer) <- .print("ERROR DRINK OWNER").
 

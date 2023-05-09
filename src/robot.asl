@@ -64,6 +64,7 @@ terminar para llevarle cerveza a otro **/
       close(fridge);
       !go_to(robot,Owner);
       hand_in(Owner,beer);
+	  hand_in(Owner,pincho);
       ?has(Owner,beer);
       // remember that another beer has been consumed
       .date(YY,MM,DD); .time(HH,NN,SS);
