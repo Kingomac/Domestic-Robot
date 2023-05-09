@@ -27,9 +27,11 @@ public class HouseModel extends GridWorldModel {
     boolean carryingTrash = false; // si el cleaner está llevando basura
     boolean carryingDelivery = false; // si el storekeeper está llevando una entrega
     boolean burningTrash = false;
+    boolean namOrSip = false;
     DishwasherStates dishwasherState = DishwasherStates.OFF;
     int carryingDish = 0; // si el robot está llevando un plato limpio o sucio
     int sipCount = 0; // how many sip the owner did
+    int namCount = 0;
     int sipCountMusk = 0;
     int availableBeers = 1; // cervezas en la nevera
     int availablePinchos = 1; // pinchos en la nevera
@@ -154,6 +156,11 @@ public class HouseModel extends GridWorldModel {
         return true;
     }
 
+    boolean handInPincho() {
+        namCount = 10;
+        return true;
+    }
+
     /**
      * Dar una cerveza al owner_musk
      * 
@@ -203,6 +210,7 @@ public class HouseModel extends GridWorldModel {
      * @return
      */
     boolean sipBeer() {
+        namOrSip = !namOrSip;
         if (sipCount > 0) {
             sipCount--;
             if (view != null)
@@ -211,6 +219,18 @@ public class HouseModel extends GridWorldModel {
         } else {
             return false;
         }
+    }
+
+    boolean namPincho() {
+        namOrSip = !namOrSip;
+        if (namCount > 0) {
+            namCount--;
+            if (view != null) {
+                view.update(Places.OWNER.x, Places.OWNER.y);
+            }
+        }
+        return true;
+
     }
 
     /**

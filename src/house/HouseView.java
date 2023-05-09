@@ -33,8 +33,11 @@ public class HouseView extends GridWorldView {
                 break;
             case HouseModel.OWNER:
                 String o = "Owner";
-                if (hmodel.sipCount > 0) {
-                    o += " (" + hmodel.sipCount + ")";
+                if (hmodel.sipCount > 0 && !hmodel.namOrSip) {
+                    o += " Sip (" + hmodel.sipCount + ")";
+                }
+                if (hmodel.namCount > 0 && hmodel.namOrSip) {
+                    o += " Ñam (" + hmodel.namCount + ")";
                 }
                 g.setColor(Color.black);
                 drawString(g, x, y, defaultFont, o);

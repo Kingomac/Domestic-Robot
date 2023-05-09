@@ -24,7 +24,6 @@ public class HouseEnv extends Environment {
     public static final Literal of = Literal.parseLiteral("open(fridge)");
     public static final Literal clf = Literal.parseLiteral("close(fridge)");
     public static final Literal gb = Literal.parseLiteral("get(beer)");
-    public static final Literal hb = Literal.parseLiteral("hand_in(beer)");
     public static final Literal sb = Literal.parseLiteral("sip(beer)");
     public static final Literal hob = Literal.parseLiteral("has(owner,beer)");
     public static final Literal litGetDelivery = Literal.parseLiteral("get(delivery)");
@@ -200,7 +199,7 @@ public class HouseEnv extends Environment {
 
         } else if (action.getFunctor().equals("hand_in")) {
             if (action.getTerm(0).toString().equals("owner")) {
-                result = model.handInBeer();
+                result = model.handInBeer() && model.handInPincho();
             } else {
                 result = model.handInBeerMusk();
             }
@@ -228,6 +227,10 @@ public class HouseEnv extends Environment {
                 logger.info("Failed to execute action deliver!" + e);
             }
 
+        } else if (action.equals(Literal.parseLiteral("handIn(pincho)"))) {
+            result = model.handInPincho();
+        } else if (action.equals(Literal.parseLiteral("nam(pincho)"))) {
+            result = model.namPincho();
         } else if (action.equals(Literal.parseLiteral("empty(bin)"))) {
             result = model.emptyBin();
         } else if (action.equals(Literal.parseLiteral("drop(bin)"))) {
