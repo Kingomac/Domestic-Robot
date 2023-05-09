@@ -192,7 +192,7 @@ public class HouseEnv extends Environment {
 
             SpecializedRobots tipo;
             tipo = SpecializedRobots.from(robot);
-            MovementDirections dir = MovementDirections.from(action.getTerm(1).toString().toUpperCase());
+            MovementDirections dir = MovementDirections.from(action.getTerm(1).toString());
             result = model.moveRobot(tipo, dir);
 
         } else if (action.equals(gb)) {

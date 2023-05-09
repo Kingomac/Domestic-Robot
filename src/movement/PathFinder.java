@@ -1,6 +1,8 @@
 package movement;
 
 import java.util.List;
+import java.util.stream.IntStream;
+
 import house.HouseModel;
 import house.SpecializedRobots;
 import java.util.LinkedList;
@@ -16,6 +18,14 @@ public class PathFinder {
     public Celda() {
       this.f = Integer.MAX_VALUE;
       this.h = Integer.MAX_VALUE;
+      this.g = 100;
+      this.padre_i = -1;
+      this.padre_j = -1;
+    }
+
+    public Celda(int h) {
+      this.f = Integer.MAX_VALUE;
+      this.h = h;
       this.g = 0;
       this.padre_i = -1;
       this.padre_j = -1;
@@ -43,59 +53,43 @@ public class PathFinder {
 
   public Location getNextPosition(Location origen, Location destino, SpecializedRobots me) {
 
-    Celda[][] infoMatriz = new Celda[model.getHeight()][model.getWidth()];
-    for (int i = 0; i < infoMatriz.length; i++) {
-      for (int j = 0; j < infoMatriz[i].length; j++) {
-        infoMatriz[i][j] = new Celda();
-        infoMatriz[i][j].h = new Location(j, i).distanceManhattan(destino);
-        if (!model.robotCanGo(me, i, j)) {
-          infoMatriz[i][j].g = Integer.MAX_VALUE;
-        }
-      }
-    }
+    // Crear matriz con datos de cada celda, se inicializa con
+    // la distancia Manhattan de cada celda al destino
+    Celda[][] infoMatriz = IntStream.range(0, model.getHeight())
+        .mapToObj(i -> IntStream.range(0, model.getWidth())
+            .mapToObj(j -> new Celda(new Location(j, i).distanceManhattan(destino))).toArray(PathFinder.Celda[]::new))
+        .toArray(PathFinder.Celda[][]::new);
 
-    // System.out.println("----- infoMatriz");
-    // for (Celda[] i : infoMatriz) {
-    // System.out.println(Arrays.toString(i));
-    // }
-
-    List<Location> listaAbierta = new LinkedList<>();
-    List<Location> listaCerrada = new LinkedList<>();
+    List<Location> listaAbierta = new LinkedList<>(); // lista de celdas posibles
+    List<Location> listaCerrada = new LinkedList<>(); // lista de celdas ya visitadas
+    // inicializar listas con el origen del robot
     listaAbierta.add(origen);
     infoMatriz[origen.y][origen.x] = new Celda(0, 0, 0, origen.y, origen.x);
 
     boolean caminoEncontrado = false;
     while (!listaAbierta.isEmpty() && !caminoEncontrado) {
-      // System.out.println("Lista abierta: " + listaAbierta.toString());
-      // System.out.println("Lista cerrada: " + listaCerrada.toString());
+      // obtener mejor casilla en la lista abierta (que no esté en la lista cerrada)
       Location q = getMinF(listaAbierta, listaCerrada, infoMatriz);
+      // se mueve de la lista abierta a la cerrada
       listaAbierta.remove(q);
       listaCerrada.add(q);
 
-      // System.out.println("Lista abierta: " + listaAbierta.toString());
-      // System.out.println("Lista cerrada: " + listaCerrada.toString());
-
+      // bucle sobre las posiciones adyacentes disponibles (obstáculos descartados)
       for (Location next : getFreeAdjacentPositions(q, destino, me)) {
-        // System.out.println("-- Checking next location: " + next);
-        if (next.equals(destino)) {
-          // System.out.println("Lista abierta: " + listaAbierta.toString());
-          // System.out.println("Lista cerrada: " + listaCerrada.toString());
-          // System.out.println("Camino encontrado: " + next);
+        if (next.equals(destino)) { // caso 1: la casilla es el destino -> fin
           caminoEncontrado = true;
           infoMatriz[destino.y][destino.x].padre_i = q.y;
           infoMatriz[destino.y][destino.x].padre_j = q.x;
-          List<Location> resultado = getResult(infoMatriz, origen, destino);
-          // System.out.println("RESULTADO");
-          // System.out.println(resultado.toString());
-          return resultado.get(0);
-          ///////////////////////////////////// return getResultado(infoMatriz, destino);
-          // return resultado.get(resultado.size() - 1);
+          return getResultNextLocation(infoMatriz, origen, destino);
         }
 
-        else if (!listaCerrada.contains(next)) {
+        else if (!listaCerrada.contains(next)) { // caso 2: no está en la lista cerrada, se sigue
+          // calcular nuevos parámetros para la celda
           int gNew = infoMatriz[next.y][next.x].g + 1;
           int fNew = infoMatriz[next.y][next.x].h + gNew;
+          // si no está en la lista abierta o su nuevo f (coste) es menor que el anterior
           if (!listaAbierta.contains(next) || infoMatriz[next.y][next.x].f > fNew) {
+            // se añade como posibilidad en la lista abierta y se actualizan sus parámetros
             listaAbierta.add(next);
             infoMatriz[next.y][next.x].g = gNew;
             infoMatriz[next.y][next.x].f = fNew;
@@ -107,7 +101,7 @@ public class PathFinder {
     }
 
     if (!caminoEncontrado)
-      System.out.println("Error: " + me.name() + " está más perdido de Juanfran en una peluquería");
+      System.out.println("Error: " + me.name() + " no ha podido encontrar un camino");
     return null;
   }
 
@@ -123,22 +117,29 @@ public class PathFinder {
     return res;
   }
 
-  List<Location> getResult(Celda[][] infoMatriz, Location orig, Location dest) {
+  private static Location getResultNextLocation(Celda[][] infoMatriz, Location orig, Location dest) {
+    List<Location> resultado = getResultPathReversed(infoMatriz, orig, dest);
+    return resultado.get(resultado.size() - 1);
+  }
+
+  private static List<Location> getResultPath(Celda[][] infoMatriz, Location orig, Location dest) {
+    List<Location> result = getResultPathReversed(infoMatriz, orig, dest);
+    Collections.reverse(result);
+    return result;
+  }
+
+  private static List<Location> getResultPathReversed(Celda[][] infoMatriz, Location orig, Location dest) {
     int i = dest.y;
     int j = dest.x;
-    // System.out.println("aaaaaaaaaaaaa");
     List<Location> resultado = new LinkedList<>();
     while (!(infoMatriz[i][j].padre_i == i && infoMatriz[i][j].padre_j == j)) {
-      // System.out.println("infomatriz[" + i + "," + j + "]: " + infoMatriz[i][j]);
       resultado.add(new Location(j, i));
       int newi = infoMatriz[i][j].padre_i;
       int newj = infoMatriz[i][j].padre_j;
-      // System.out.format("[%d,%d] -> [%d,%d], ", i, j, newi, newj);
       i = newi;
       j = newj;
     }
 
-    Collections.reverse(resultado);
     return resultado;
   }
 
