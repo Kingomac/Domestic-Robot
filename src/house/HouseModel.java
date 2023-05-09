@@ -31,7 +31,7 @@ public class HouseModel extends GridWorldModel {
     int carryingDish = 0; // si el robot está llevando un plato limpio o sucio
     int sipCount = 0; // how many sip the owner did
     int sipCountMusk = 0;
-    int availableBeers = 1; // cervezas en la nevera
+    int availableBeers = 3; // cervezas en la nevera
     int availablePinchos = 1; // pinchos en la nevera
     int deliveryBeers = 0; // cervezas en la zona delivery
     int binCount = 0; // núm. cervezas en la papelera
@@ -193,7 +193,7 @@ public class HouseModel extends GridWorldModel {
         availablePinchos += 3;
         carryingDelivery = false;
         if (view != null)
-            view.update(Places.DELIVERY.x, Places.DELIVERY.y);
+            view.update(Places.FRIDGE.x, Places.FRIDGE.y);
         return true;
     }
 

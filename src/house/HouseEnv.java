@@ -6,7 +6,10 @@ import jason.environment.grid.Location;
 import movement.MovementDirections;
 import movement.NextDirection;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -22,6 +25,10 @@ public class HouseEnv extends Environment {
     private int dishwasherCycles = 10;
 
     // common literals
+
+    public static final List<String> SUPERMARKETS = Collections
+            .unmodifiableList(Arrays.asList("supermarket_mercadona", "supermarket_lidl"));
+
     public static final Literal of = Literal.parseLiteral("open(fridge)");
     public static final Literal clf = Literal.parseLiteral("close(fridge)");
     public static final Literal gb = Literal.parseLiteral("get(beer)");
@@ -167,10 +174,8 @@ public class HouseEnv extends Environment {
         precioProveedor.forEach((key, val) -> {
             double r = priceMultipliers[(int) Math.floor(Math.random() * priceMultipliers.length)];
             precioProveedor.put(key, val * r);
-            addPercept("supermarket_mercadona",
-                    Literal.parseLiteral(String.format(Locale.ROOT, "proveedor(%s, %f)", key, val * r)));
-            addPercept("supermarket_lidl",
-                    Literal.parseLiteral(String.format(Locale.ROOT, "proveedor(%s, %f)", key, val * r)));
+            SUPERMARKETS.forEach(i -> addPercept(i,
+                    Literal.parseLiteral(String.format(Locale.ROOT, "proveedor(%s, %f)", key, val * r))));
         });
 
     }
