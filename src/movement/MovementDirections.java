@@ -19,6 +19,6 @@ public enum MovementDirections {
       throws ClassCastException, IllegalArgumentException, NullPointerException {
     if (in == null)
       throw new IllegalArgumentException();
-    return STRINGS_MAP.get(in);
+    return STRINGS_MAP.get(in.toUpperCase());
   }
 }
