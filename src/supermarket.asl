@@ -3,7 +3,6 @@
 /** Multiplicadores del precio **/
 price_rise(S + 1.1) :- .random(S).
 price_lower(0.999 - S * 0.1) :- .random(S).
-profit(S + 1) :- .random(S).
 
 last_order_id(1). // initial belief
 
@@ -11,22 +10,23 @@ last_order_id(1). // initial belief
 !start.
 
 +!start : true <-
+		.random(RandProf); +profit(RandProf); // profit_real <- profit + 1
 		.random(M); +money((M + 100) * 1000);
 		.wait(proveedor(_,_));
 		for(proveedor(Prod,Precio)) {
 			.print("OFFER: ", Prod);
 			?profit(Profit);
 			.random(S);
-			+offer(Prod,Precio * Profit, math.round((S + 1) * 5));
+			+offer(Prod,Precio * (Profit + 1), math.round((S + 1) * 5));
 			.send(robot, tell, offer(Prod,Precio * Profit, math.round((S + 1) * 5)));
-		}.
+		}; !make_discount.
 
 
 /** Cada cierto tiempo hace un descuento **/
 +!make_discount : price_lower(Mult) <-
 		.wait(10000);
 		?price(beer, P);
-		-+price(beer, P * Mult);
+		-+profit(P * Mult);
 		!make_discount. 
 
 // plan to achieve the goal "order" for agent Ag
@@ -49,7 +49,7 @@ last_order_id(1). // initial belief
 	-+money(Money - PrecioProv * 10); ?profit(Profit); -+offer(Producto, PrecioProv * Profit, Cantidad + 10).
 
 /** Cuando recibe un pago incrementa el precio de la cerveza **/
-+payment(_, _, P) : money(M) & price_rise(MULT) <- -+money(P + M); -+price(beer, P * MULT).
++payment(_, _, P) : money(M) & price_rise(MULT) & profit(Profit) <- -+money(P + M); -+profit(Profit * MULT).
 
 		
 +msg(M)[source(Ag)] : true
