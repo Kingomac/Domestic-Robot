@@ -213,6 +213,8 @@ public class HouseModel extends GridWorldModel {
         namOrSip = !namOrSip;
         if (sipCount > 0) {
             sipCount--;
+            if (sipCount == 0)
+                dropBeer();
             if (view != null)
                 view.update(Places.OWNER.x, Places.OWNER.y);
             return true;

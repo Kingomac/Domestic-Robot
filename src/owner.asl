@@ -21,7 +21,7 @@ favorite(pincho, durum).
    <- !drink(beer).
 -has(owner,beer) : true
    <- 	///////
-   		drop(beer);
+   		//drop(beer);
 		///////
    		!get(beer).
 
