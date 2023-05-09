@@ -25,7 +25,7 @@ last_order_id(1). // initial belief
 /** Cada cierto tiempo hace un descuento **/
 +!make_discount : price_lower(Mult) <-
 		.wait(10000);
-		?price(beer, P);
+		?profit(P);
 		-+profit(P * Mult);
 		!make_discount. 
 

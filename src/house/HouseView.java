@@ -65,7 +65,7 @@ public class HouseView extends GridWorldView {
                 if (hmodel.dishwasherState.equals(DishwasherStates.ON)) {
                     dishwasherM = "**Dishwasher**";
                 } else {
-                    dishwasherM = String.format("Dishwasher %d/5", hmodel.dishwasherCount);
+                    dishwasherM = String.format("Dishwasher %d/6", hmodel.dishwasherCount);
                 }
                 drawString(g, x, y, defaultFont, dishwasherM);
                 break;

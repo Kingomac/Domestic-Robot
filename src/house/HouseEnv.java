@@ -164,15 +164,18 @@ public class HouseEnv extends Environment {
 
         switch (model.dishwasherState) {
             case ON:
+                // System.out.println("DISHWASHER: ON cycles: " + dishwasherCycles);
                 dishwasherCycles--;
                 if (dishwasherCycles <= 0)
                     model.dishwasherState = DishwasherStates.FINISH;
                 break;
             case FINISH:
+                // System.out.println("DISHWASHER: FINISH cycles: " + dishwasherCycles);
                 if (model.dishwasherCount <= 0)
                     model.dishwasherState = DishwasherStates.OFF;
                 break;
             case OFF:
+                // System.out.println("DISHWASHER: OFF cycles: " + dishwasherCycles);
                 if (dishwasherCycles <= 0)
                     dishwasherCycles = 10;
                 break;
@@ -184,6 +187,10 @@ public class HouseEnv extends Environment {
             SUPERMARKETS.forEach(i -> addPercept(i,
                     Literal.parseLiteral(String.format(Locale.ROOT, "proveedor(%s, %f)", key, val * r))));
         });
+
+        System.out.println("CARRYING DISH DIRTY: " + model.carryingDishDirty);
+        System.out.println("CARRYING DISH CLEAN: " + model.carryingDishClean);
+        System.out.println("CARRYING DISH PINCHO: " + model.carryingDishPincho);
 
     }
 
@@ -211,7 +218,11 @@ public class HouseEnv extends Environment {
 
         } else if (action.getFunctor().equals("hand_in")) {
             if (action.getTerm(0).toString().equals("owner")) {
-                result = model.handInBeer() && model.handInPincho();
+                if (action.getTerm(1).toString().equals("beer")) {
+                    result = model.handInBeer();
+                } else if (action.getTerm(1).toString().equals("pincho")) {
+                    result = model.handInPincho();
+                }
             } else {
                 result = model.handInBeerMusk();
             }
@@ -232,6 +243,8 @@ public class HouseEnv extends Environment {
             result = model.saveBeer();
         } else if (action.equals(Literal.parseLiteral("make(pinchos)"))) {
             result = model.makePinchos();
+        } else if (action.equals(Literal.parseLiteral("get(dish,cupboard))"))) {
+            result = model.getPlateFromCupboard();
         } else if (action.getFunctor().equals("deliver")) {
             // wait 4 seconds to finish "deliver"
             try {
@@ -241,8 +254,6 @@ public class HouseEnv extends Environment {
                 logger.info("Failed to execute action deliver!" + e);
             }
 
-        } else if (action.equals(Literal.parseLiteral("handIn(pincho)"))) {
-            result = model.handInPincho();
         } else if (action.equals(Literal.parseLiteral("nam(pincho)"))) {
             result = model.namPincho();
         } else if (action.equals(Literal.parseLiteral("empty(bin)"))) {

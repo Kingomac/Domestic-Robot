@@ -29,24 +29,22 @@ too_much(Owner, B) :-
 terminar para llevarle cerveza a otro **/
 !myrobot.
 +!myrobot: plate(dirty)[source(Owner)] <- 
-	take(plate,Owner);
+	!go_to(robot,Owner);
 	-plate(dirty)[source(Owner)];
+	//.wait({ -plate(dirty) });
+	take(plate,Owner);
 	!go_to(robot, dishwasher);
 	put(dish,dishwasher);
+	.wait(plate(dishwasher,_));
 	?plate(dishwasher, X);
 	if(X >= 6) { dishwasher(on) };
+	.wait(500);
 	!myrobot.
-+!myrobot: bring(beer)[source(Owner)] <- !give(Owner,beer); !myrobot.
++!myrobot: bring(beer)[source(Owner)] <- !get_dish_for_pincho; !give(Owner,beer); !myrobot.
 +!myrobot: dishwasher(finish) <- !save_plates; !myrobot.
++!myrobot: dishwasher(on) <- !go_to(robot, base_robot); .wait(500); !myrobot.
 +!myrobot: true <- !go_to(robot, base_robot); .wait(500); !myrobot.
 
-/*+!bring(Owner, beer) : .intend(give(A,_)) & A \== Owner <- .wait(3000); !bring(Owner, beer).
-+!bring(Owner, beer) : true <- !give(Owner, beer).
--!bring(_,_)
-   :  true
-   <- .current_intention(I);
-      .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
-*/
 +!save_plates : plate(dishwasher, X) & X == 0 <- true.
 +!save_plates : plate(dishwasher, X) & X > 0 <-
 	!go_to(robot, dishwasher);
@@ -57,6 +55,7 @@ terminar para llevarle cerveza a otro **/
 	!save_plates.
 
 //+dishwasher(finish) <- !save_plates.
++!get_dish_for_pincho <- !go_to(robot, cupboard); get(dish, cupboard).
 	
 //+!give(Owner, beer) : dishwasher(finish) <- !save_plates; !give(Owner, beer).
 

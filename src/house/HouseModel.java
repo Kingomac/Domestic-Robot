@@ -29,7 +29,9 @@ public class HouseModel extends GridWorldModel {
     boolean burningTrash = false;
     boolean namOrSip = false;
     DishwasherStates dishwasherState = DishwasherStates.OFF;
-    int carryingDish = 0; // si el robot está llevando un plato limpio o sucio
+    int carryingDishDirty = 0; // si el robot está llevando un plato limpio o sucio
+    int carryingDishClean = 0;
+    int carryingDishPincho = 0;
     int sipCount = 0; // how many sip the owner did
     int namCount = 0;
     int sipCountMusk = 0;
@@ -39,7 +41,7 @@ public class HouseModel extends GridWorldModel {
     int deliveryBeers = 0; // cervezas en la zona delivery
     int binCount = 0; // núm. cervezas en la papelera
     int dishwasherCount = 0;
-    int cupboardCount = 0;
+    int cupboardCount = 8;
     List<Location> trash = new LinkedList<>(); // localización de la basura del mapa
 
     public HouseModel() {
@@ -124,6 +126,8 @@ public class HouseModel extends GridWorldModel {
         if (availableBeers > 0) {
             availableBeers--;
             availablePinchos--;
+            carryingDishClean--;
+            carryingDishPincho++;
             carryingBeer = true;
             if (view != null)
                 view.update(Places.FRIDGE.x, Places.FRIDGE.y);
@@ -158,6 +162,7 @@ public class HouseModel extends GridWorldModel {
     }
 
     boolean handInPincho() {
+        carryingDishPincho--;
         namCount = 10;
         return true;
     }
@@ -403,16 +408,16 @@ public class HouseModel extends GridWorldModel {
     }
 
     boolean putDishInDishwasher() {
-        dishwasherCount += carryingDish;
-        carryingDish = 0;
+        dishwasherCount += carryingDishDirty;
+        carryingDishDirty = 0;
         if (view != null)
             view.update(Places.DISHWASHER.x, Places.DISHWASHER.y);
         return true;
     }
 
     boolean putDishInCupboard() {
-        cupboardCount += carryingDish;
-        carryingDish = 0;
+        cupboardCount += carryingDishClean;
+        carryingDishClean = 0;
         if (view != null)
             view.update(Places.CUPBOARD.x, Places.CUPBOARD.y);
         return true;
@@ -420,14 +425,22 @@ public class HouseModel extends GridWorldModel {
 
     boolean getDishInDishwasher() {
         dishwasherCount--;
-        carryingDish++;
+        carryingDishClean++;
         if (view != null)
             view.update(Places.DISHWASHER.x, Places.DISHWASHER.y);
         return true;
     }
 
     boolean takePlateOwner() {
-        carryingDish++;
+        carryingDishDirty++;
+        return true;
+    }
+
+    boolean getPlateFromCupboard() {
+        cupboardCount--;
+        carryingDishClean++;
+        if (view != null)
+            view.update(Places.CUPBOARD.x, Places.CUPBOARD.y);
         return true;
     }
 
@@ -458,6 +471,8 @@ public class HouseModel extends GridWorldModel {
     public boolean makePinchos() {
         availableTapas--;
         availablePinchos += 3;
+        if (view != null)
+            view.update(Places.FRIDGE.x, Places.FRIDGE.y);
         return true;
     }
 
