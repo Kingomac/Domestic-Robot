@@ -135,6 +135,10 @@ public class HouseEnv extends Environment {
         if (Places.FRIDGE.location.distanceManhattan(lRobot) <= 1) { // Si está en la nevera puede ver cuantas quedan
             addPercept("robot",
                     Literal.parseLiteral(String.format("available(fridge, beer, %d)", model.availableBeers)));
+            addPercept("robot",
+                    Literal.parseLiteral(String.format("available(fridge, tapa, %d)", model.availableTapas)));
+            addPercept("robot",
+                    Literal.parseLiteral(String.format("available(fridge, pincho, %d)", model.availablePinchos)));
             if (model.availableBeers > 0)
                 addPercept("robot", Literal.parseLiteral("available(fridge, beer)"));
         }
@@ -226,6 +230,8 @@ public class HouseEnv extends Environment {
             result = model.getDelivered();
         } else if (action.equals(litSaveBeer) && ag.equals("robot")) {
             result = model.saveBeer();
+        } else if (action.equals(Literal.parseLiteral("make(pinchos)"))) {
+            result = model.makePinchos();
         } else if (action.getFunctor().equals("deliver")) {
             // wait 4 seconds to finish "deliver"
             try {

@@ -60,11 +60,18 @@ terminar para llevarle cerveza a otro **/
 	
 //+!give(Owner, beer) : dishwasher(finish) <- !save_plates; !give(Owner, beer).
 
++!get_when_available(pincho): available(fridge, pincho, N) & N > 0 <- true.
++!get_when_available(pincho): available(fridge, pincho, NP) 
+	& NP <= 0 & available(fridge, tapa, NT) & NT > 0 <-  make(pinchos); .wait(2000).
++!get_when_available(pincho): available(fridge, pincho, NP) 
+	& NP <= 0 & available(fridge, tapa, NT) & NT <= 0 <-  .wait(200); !get_when_available.
+
 /** Acción de coger y llevarle al owner correspondiente la cerveza **/
 +!give(Owner,beer)
    :  not too_much(Owner,beer)
    <- !go_to(robot,fridge);
       !get_when_available(beer);
+	  !get_when_available(pincho);
       close(fridge);
       !go_to(robot,Owner);
       hand_in(Owner,beer);
