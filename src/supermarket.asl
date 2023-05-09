@@ -4,12 +4,6 @@
 price_rise(S + 1.1) :- .random(S).
 price_lower(0.999 - S * 0.1) :- .random(S).
 profit(S + 1) :- .random(S).
-product(mahou).
-product(estrella).
-product(skoll).
-product(tortilla).
-product(empanada).
-product(durum).
 
 last_order_id(1). // initial belief
 
@@ -18,15 +12,26 @@ last_order_id(1). // initial belief
 
 +!start : true <-
 		.random(M); +money((M + 100) * 1000);
-		.wait(100);
-		for(product(Prod)) {
+		.print("ANTES DEL WAIT");
+		.wait(proveedor(_,_));
+		.print("DESPUÉS DEL WAIT");
+		for(proveedor(Prod,Precio)) {
+			.print("OFFER: ", Prod);
+			?profit(Profit);
+			.random(S);
+			+offer(Prod,Precio * Profit, math.round((S + 1) * 5));
+			.send(robot, tell, offer(Prod,Precio * Profit, math.round((S + 1) * 5)));
+		}.
+
+		/*for(product(Prod)) {
+			.print("OFFER: ", Prod);
 			.wait(proveedor(Prod,_));
 			?proveedor(Prod, Precio);
 			?profit(Profit);
 			.random(S);
 			+offer(Prod,Precio * Profit, 1);//math.round((S + 1) * 5));
 			.send(robot, tell, offer(Prod,Precio * Profit, math.round((S + 1) * 5)));
-		}.
+		}.*/
 
 
 /** Cada cierto tiempo hace un descuento **/

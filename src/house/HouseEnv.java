@@ -7,6 +7,7 @@ import movement.MovementDirections;
 import movement.NextDirection;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -63,11 +64,7 @@ public class HouseEnv extends Environment {
     /** creates the agents percepts based on the HouseModel */
     void updatePercepts() {
         // clear the percepts of the agents
-        clearPercepts("robot");
-        clearPercepts("owner");
-        clearPercepts("owner_musk");
-        clearPercepts("supermarket_mercadona");
-        clearPercepts("supermarket_lidl");
+        clearAllPercepts();
 
         /*
          * Código para meterle percepts de a dónde pueden ir
@@ -170,8 +167,10 @@ public class HouseEnv extends Environment {
         precioProveedor.forEach((key, val) -> {
             double r = priceMultipliers[(int) Math.floor(Math.random() * priceMultipliers.length)];
             precioProveedor.put(key, val * r);
-            addPercept("supermarket_mercadona", Literal.parseLiteral(String.format("proveedor(%s, %f)", key, val * r)));
-            addPercept("supermarket_lidl", Literal.parseLiteral(String.format("proveedor(%s, %f)", key, val * r)));
+            addPercept("supermarket_mercadona",
+                    Literal.parseLiteral(String.format(Locale.ROOT, "proveedor(%s, %f)", key, val * r)));
+            addPercept("supermarket_lidl",
+                    Literal.parseLiteral(String.format(Locale.ROOT, "proveedor(%s, %f)", key, val * r)));
         });
 
     }
