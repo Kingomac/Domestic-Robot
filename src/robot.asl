@@ -26,14 +26,27 @@ too_much(Owner, B) :-
 	}; .print("Precios actualizados").
 
 /** Si el robot tiene la intención de llevarle la cerveza a un owner espera a 
-terminar para llevarle cerveza a otro **/ 
-+!bring(Owner, beer) : .intend(give(A,_)) & A \== Owner <- .wait(3000); !bring(Owner, beer).
+terminar para llevarle cerveza a otro **/
+!myrobot.
++!myrobot: plate(dirty)[source(Owner)] <- 
+	take(plate,Owner);
+	-plate(dirty)[source(Owner)];
+	!go_to(robot, dishwasher);
+	put(dish,dishwasher);
+	?plate(dishwasher, X);
+	if(X >= 6) { dishwasher(on) };
+	!myrobot.
++!myrobot: bring(beer)[source(Owner)] <- !give(Owner,beer); !myrobot.
++!myrobot: dishwasher(finish) <- !save_plates; !myrobot.
++!myrobot: true <- !go_to(robot, base_robot); .wait(500); !myrobot.
+
+/*+!bring(Owner, beer) : .intend(give(A,_)) & A \== Owner <- .wait(3000); !bring(Owner, beer).
 +!bring(Owner, beer) : true <- !give(Owner, beer).
 -!bring(_,_)
    :  true
    <- .current_intention(I);
       .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
-
+*/
 +!save_plates : plate(dishwasher, X) & X == 0 <- true.
 +!save_plates : plate(dishwasher, X) & X > 0 <-
 	!go_to(robot, dishwasher);
@@ -43,20 +56,11 @@ terminar para llevarle cerveza a otro **/
 	.wait(plate(dishwasher,_));
 	!save_plates.
 
-+dishwasher(finish) <- !save_plates.
+//+dishwasher(finish) <- !save_plates.
 	
 //+!give(Owner, beer) : dishwasher(finish) <- !save_plates; !give(Owner, beer).
 
 /** Acción de coger y llevarle al owner correspondiente la cerveza **/
-+!give(Owner, beer) : plate(dirty)[source(Owner)] <- 
-	take(plate,Owner);
-	-plate(dirty)[source(Owner)];
-	!go_to(robot, dishwasher);
-	put(dish,dishwasher);
-	?plate(dishwasher, X);
-	if(X >= 6) { dishwasher(on) };
-	!give(Owner,beer).
-
 +!give(Owner,beer)
    :  not too_much(Owner,beer)
    <- !go_to(robot,fridge);
@@ -74,7 +78,8 @@ terminar para llevarle cerveza a otro **/
    :  too_much(Owner,beer) & limit(beer,L)
    <- .concat("The Department of Health does not allow me to give ", Owner, " more than ", L,
               " beers a day! I am very sorry about that!",M);
-      .send(Owner,tell,msg(M)).
+      .send(Owner,tell,msg(M));
+	  -bring(beer)[source(Owner)].
 	  
 -!give(_,_)
    :  true
@@ -156,7 +161,7 @@ terminar para llevarle cerveza a otro **/
 /** Cleaner. Recoge basura si hay **/
 !clean_trash.
 +!clean_trash: where(trash, _, _) <- !go_to(cleaner, trash); take(trash); !go_to(cleaner, bin); drop(trash); !clean_trash. 
-+!clean_trash: true <- !go_to(cleaner, base_cleaner); .wait({ +where(trash,_,_) }); !clean_trash.
++!clean_trash: true <- !go_to(cleaner, base_cleaner); .wait(where(trash,_,_)); !clean_trash.
 
 /** Movimiento simple en diagonal **/
 +!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait(where(Sitio, _, _)); !go_to(Tipo, Sitio).

@@ -15,7 +15,7 @@ favorite(pincho, durum).
 // Darle dinero al robot si se lo pide
 +!ask_money(Ag) : money(X) & X > 0 <- .send(Ag, achieve, save_money(X * 0.5)); -+money(X * 0.5).
 +!get(beer) : true
-   <- .send(robot, achieve, bring(owner,beer)).
+   <- .send(robot, tell, bring(beer)).
 
 +has(owner,beer) : true
    <- !drink(beer).

@@ -158,16 +158,20 @@ public class HouseEnv extends Environment {
 
         addPercept("robot", Literal.parseLiteral(String.format("cupboard(dish,%d)", model.cupboardCount)));
 
-        if (model.dishwasherState.equals(DishwasherStates.ON)) {
-            dishwasherCycles--;
-        }
-        if (dishwasherCycles <= 0) {
-            dishwasherCycles = 10;
-            model.dishwasherState = DishwasherStates.FINISH;
-        }
-
-        if (model.dishwasherState.equals(DishwasherStates.FINISH) && model.dishwasherCount == 0) {
-            model.dishwasherState = DishwasherStates.OFF;
+        switch (model.dishwasherState) {
+            case ON:
+                dishwasherCycles--;
+                if (dishwasherCycles <= 0)
+                    model.dishwasherState = DishwasherStates.FINISH;
+                break;
+            case FINISH:
+                if (model.dishwasherCount <= 0)
+                    model.dishwasherState = DishwasherStates.OFF;
+                break;
+            case OFF:
+                if (dishwasherCycles <= 0)
+                    dishwasherCycles = 10;
+                break;
         }
 
         precioProveedor.forEach((key, val) -> {
