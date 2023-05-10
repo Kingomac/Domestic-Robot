@@ -1,7 +1,7 @@
 package movement;
 
 import house.HouseModel;
-import house.SpecializedRobots;
+import house.MobileAgents;
 import jason.JasonException;
 import jason.asSemantics.DefaultInternalAction;
 import jason.asSemantics.TransitionSystem;
@@ -29,7 +29,7 @@ public class NextDirection extends DefaultInternalAction {
       int origenY = (int) ((NumberTerm) args[1]).solve();
       int destinoX = (int) ((NumberTerm) args[2]).solve();
       int destinoY = (int) ((NumberTerm) args[3]).solve();
-      SpecializedRobots robot = SpecializedRobots.from(args[4].toString());
+      MobileAgents robot = MobileAgents.from(args[4].toString());
 
       if (!model.inGrid(destinoX, destinoY))
         throw new IllegalArgumentException("nextDirection destiny must be a free valid position");

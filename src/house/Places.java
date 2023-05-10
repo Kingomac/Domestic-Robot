@@ -7,8 +7,7 @@ import jason.environment.grid.Location;
  */
 enum Places {
   FRIDGE(new Location(0, 0), HouseModel.FRIDGE),
-  OWNER(new Location(HouseModel.GSize - 1, HouseModel.GSize - 1), HouseModel.OWNER),
-  // OWNER_MUSK(new Location(HouseModel.GSize / 2, 0), HouseModel.OWNER_MUSK),
+  OWNER(new Location(HouseModel.GSize - 1, HouseModel.GSize - 1), HouseModel.OWNER, 1, false, true),
   BIN(new Location(HouseModel.GSize - 1, 0), HouseModel.BIN),
   DELIVERY(new Location(0, HouseModel.GSize - 1), HouseModel.DELIVERY),
   DISHWASHER(new Location(2, 0), HouseModel.DISHWASHER),
@@ -25,6 +24,7 @@ enum Places {
   public final int gridConst;
   public final int minDist;
   public final boolean canGoThrough;
+  public final boolean isOwnerSofa;
 
   private Places(Location loc) {
     location = loc;
@@ -33,6 +33,7 @@ enum Places {
     y = loc.y;
     minDist = 1;
     canGoThrough = false;
+    isOwnerSofa = false;
   }
 
   private Places(Location loc, int gridConst) {
@@ -42,6 +43,7 @@ enum Places {
     y = loc.y;
     minDist = 1;
     canGoThrough = false;
+    isOwnerSofa = false;
   }
 
   private Places(Location loc, int gridConst, int minDist) {
@@ -51,6 +53,7 @@ enum Places {
     y = loc.y;
     this.minDist = minDist;
     canGoThrough = false;
+    isOwnerSofa = false;
   }
 
   private Places(Location loc, int gridConst, int minDist, boolean canGoThrough) {
@@ -60,6 +63,17 @@ enum Places {
     y = loc.y;
     this.minDist = minDist;
     this.canGoThrough = canGoThrough;
+    isOwnerSofa = false;
+  }
+
+  private Places(Location loc, int gridConst, int minDist, boolean canGoThrough, boolean isOwnerSofa) {
+    location = loc;
+    this.gridConst = gridConst;
+    x = loc.x;
+    y = loc.y;
+    this.minDist = minDist;
+    this.canGoThrough = canGoThrough;
+    this.isOwnerSofa = isOwnerSofa;
   }
 
   /**

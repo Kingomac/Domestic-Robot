@@ -8,6 +8,11 @@ favorite(pincho, durum).
 !get(beer).   // initial goal: get a beer
 !check_bored. // initial goal: verify whether I am getting bored
 
++!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait(where(Sitio, _, _)); !go_to(Tipo, Sitio).
++!go_to(Tipo, Sitio) : at(Tipo, Sitio) <- true.
++!go_to(Tipo, Sitio) : not at(Tipo, Sitio) & where(Sitio, DestX,DestY) & at(Tipo, OrigenX, OrigenY) <- movement.NextDirection(OrigenX,OrigenY,DestX,DestY,Tipo,AA); move_robot(Tipo, AA); !go_to(Tipo, Sitio).
+-!go_to(Tipo, Sitio) <- .print(Tipo, " can't !go_to ", Sitio); .wait(3000); !go_to(Tipo, Sitio).
+
 
 +!tell_preferences <- for(favorite(Prod, Pref)) {
 	.send(robot, tell, favorite(Prod, Pref));
@@ -26,8 +31,10 @@ favorite(pincho, durum).
    		!get(beer).
 
 // if I have not beer finish, in other case while I have beer, sip
++!drink(beer) : not has(owner,beer) & .random(Rand) & Rand < 0.5
+   <- .send(robot, tell, plate(dirty)); !go_to(owner, bin); recycle(owner,beer);!go_to(owner,owner).
 +!drink(beer) : not has(owner,beer)
-   <- .send(robot, tell, plate(dirty)).
+   <- .send(robot, tell, plate(dirty)); drop(beer).
 +!drink(beer) //: has(owner,beer)
    <- sip(beer);
    	  nam(pincho);

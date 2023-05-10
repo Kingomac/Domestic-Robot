@@ -5,18 +5,12 @@ import jason.environment.Environment;
 import jason.environment.grid.Location;
 import movement.MovementDirections;
 import movement.NextDirection;
-
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.sound.sampled.LineEvent;
 
 enum DishwasherStates {
     OFF,
@@ -36,7 +30,8 @@ public class HouseEnv extends Environment {
             "open(fridge)", "close(fridge)", "get(beer)", "sip(beer)", "has(owner,beer)",
             "get(delivery)", "save(beer)", "drop(beer)", "take(trash)", "drop(trash)",
             "make(pinchos)", "get(dish,cupboard)", "nam(pincho)", "empty(bin)", "drop(bin)",
-            "put(dish,dishwasher)", "put(dish,cupboard)", "get(dish,dishwasher)", "dishwasher(on)")
+            "put(dish,dishwasher)", "put(dish,cupboard)", "get(dish,dishwasher)", "dishwasher(on)",
+            "recycle(owner,beer)")
             .stream().collect(Collectors.toMap(
                     i -> i,
                     i -> Literal.parseLiteral(i)));
@@ -72,23 +67,28 @@ public class HouseEnv extends Environment {
         // clear the percepts of the agents
         clearAllPercepts();
 
-        for (SpecializedRobots robot : SpecializedRobots.values()) {
+        for (MobileAgents robot : MobileAgents.values()) {
             Location loc = model.getAgPos(robot.getValue());
             // Añadir at(Tipo, X, Y)
-            addPercept("robot", Literal.parseLiteral(
-                    String.format("at(%s, %d, %d)", robot.name().toLowerCase(), loc.x, loc.y)));
+            MobileAgents.AGENTS.forEach(i -> addPercept(i, Literal.parseLiteral(
+                    String.format("at(%s, %d, %d)", robot.name().toLowerCase(), loc.x, loc.y))));
         }
 
         // Añadir where(Lugar, X, Y) y at(Tipo, Lugar)
         for (Places pl : Places.values()) {
             if (pl.x == -1 && pl.y == -1)
                 continue;
-            addPercept("robot",
-                    Literal.parseLiteral(String.format("where(%s,%d,%d)", pl.name().toLowerCase(), pl.x, pl.y)));
 
-            for (SpecializedRobots robot : SpecializedRobots.values()) {
-                if (model.getAgPos(robot.getValue()).distanceManhattan(pl.location) <= pl.minDist) {
-                    addPercept("robot", Literal.parseLiteral(
+            MobileAgents.AGENTS.forEach(i -> addPercept(i,
+                    Literal.parseLiteral(String.format("where(%s,%d,%d)", pl.name().toLowerCase(), pl.x, pl.y))));
+            for (MobileAgents robot : MobileAgents.values()) {
+                if (!pl.equals(robot.base)
+                        && model.getAgPos(robot.getValue()).distanceManhattan(pl.location) <= pl.minDist) {
+                    addPercept(robot.agentName, Literal.parseLiteral(
+                            String.format("at(%s, %s)", robot.name().toLowerCase(), pl.name().toLowerCase())));
+                } else if (pl.equals(robot.base)
+                        && model.getAgPos(robot.getValue()).distanceManhattan(pl.location) < 1) {
+                    addPercept(robot.agentName, Literal.parseLiteral(
                             String.format("at(%s, %s)", robot.name().toLowerCase(), pl.name().toLowerCase())));
                 }
             }
@@ -97,11 +97,12 @@ public class HouseEnv extends Environment {
         // Recorrer lista de basura
         if (!model.trash.isEmpty()) {
             for (Location lTrash : model.trash) {
-                addPercept("robot", Literal.parseLiteral(String.format("where(trash,%d,%d)", lTrash.x, lTrash.y)));
-                for (SpecializedRobots robot : SpecializedRobots.values()) {
+                MobileAgents.AGENTS.forEach(i -> addPercept(i,
+                        Literal.parseLiteral(String.format("where(trash,%d,%d)", lTrash.x, lTrash.y))));
+                for (MobileAgents robot : MobileAgents.values()) {
                     if (model.getAgPos(robot.getValue()).distanceManhattan(lTrash) <= 1) {
-                        addPercept("robot", Literal.parseLiteral(
-                                String.format("at(%s, trash)", robot.name().toLowerCase())));
+                        MobileAgents.AGENTS.forEach(i -> addPercept("robot", Literal.parseLiteral(
+                                String.format("at(%s, trash)", robot.name().toLowerCase()))));
                     }
                 }
             }
@@ -112,7 +113,7 @@ public class HouseEnv extends Environment {
             addPercept("robot", Literal.parseLiteral("bin(full)"));
 
         // El robot cuando está en la nevera puede ver cuantas cervezas quedan
-        Location lRobot = model.getAgPos(SpecializedRobots.ROBOT.getValue());
+        Location lRobot = model.getAgPos(MobileAgents.ROBOT.getValue());
         if (Places.FRIDGE.location.distanceManhattan(lRobot) <= 1) { // Si está en la nevera puede ver cuantas quedan
             addPercept("robot",
                     Literal.parseLiteral(String.format("available(fridge, beer, %d)", model.availableBeers)));
@@ -126,8 +127,7 @@ public class HouseEnv extends Environment {
 
         // has(owner,beer)
         if (model.sipCount > 0) {
-            addPercept("robot", LITERALS.get("has(owner,beer)"));
-            addPercept("owner", LITERALS.get("has(owner,beer)"));
+            MobileAgents.AGENTS.forEach(i -> addPercept(i, LITERALS.get("has(owner,beer)")));
         }
 
         // Dishwasher
@@ -175,10 +175,10 @@ public class HouseEnv extends Environment {
         } else if (action.getFunctor().equals("move_robot")) {
             String robot = action.getTerm(0).toString();
 
-            SpecializedRobots tipo;
-            tipo = SpecializedRobots.from(robot);
+            MobileAgents tipo;
+            tipo = MobileAgents.from(robot);
             MovementDirections dir = MovementDirections.from(action.getTerm(1).toString());
-            result = model.moveRobot(tipo, dir);
+            result = model.moveAgent(tipo, dir);
 
         } else if (action.equals(LITERALS.get("get(beer)"))) {
             result = model.getBeer();
@@ -190,10 +190,7 @@ public class HouseEnv extends Environment {
                 } else if (action.getTerm(1).toString().equals("pincho")) {
                     result = model.handInPincho();
                 }
-            } else {
-                result = model.handInBeerMusk();
             }
-
         } else if (action.equals(LITERALS.get("sip(beer)"))) {
             result = model.sipBeer();
         } else if (action.equals(LITERALS.get("drop(trash)"))) {
@@ -236,6 +233,8 @@ public class HouseEnv extends Environment {
             result = model.dishwasherOn();
         } else if (action.getFunctor().equals("take") && action.getTerm(0).toString().equals("plate")) {
             result = model.takePlateOwner();
+        } else if (action.equals(LITERALS.get("recycle(owner,beer)"))) {
+            result = model.recycleBeer();
         } else {
             logger.info("Failed to execute action " + action);
         }
