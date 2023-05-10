@@ -7,7 +7,7 @@ import jason.environment.grid.Location;
  */
 enum Places {
   FRIDGE(new Location(0, 0), HouseModel.FRIDGE),
-  OWNER(new Location(HouseModel.GSize - 1, HouseModel.GSize - 1), HouseModel.OWNER, 0, true),
+  OWNER(new Location(HouseModel.GSize - 1, HouseModel.GSize - 1)),
   BIN(new Location(HouseModel.GSize - 1, 0), HouseModel.BIN),
   DELIVERY(new Location(0, HouseModel.GSize - 1), HouseModel.DELIVERY),
   DISHWASHER(new Location(2, 0), HouseModel.DISHWASHER),

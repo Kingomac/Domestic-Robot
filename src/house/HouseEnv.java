@@ -30,7 +30,8 @@ public class HouseEnv extends Environment {
             "open(fridge)", "close(fridge)", "get(beer)", "sip(beer)", "has(owner,beer)",
             "get(delivery)", "save(beer)", "drop(beer)", "take(trash)", "drop(trash)",
             "make(pinchos)", "get(dish,cupboard)", "nam(pincho)", "empty(bin)", "drop(bin)",
-            "put(dish,dishwasher)", "put(dish,cupboard)", "get(dish,dishwasher)", "dishwasher(on)")
+            "put(dish,dishwasher)", "put(dish,cupboard)", "get(dish,dishwasher)", "dishwasher(on)",
+            "recycle(owner,beer)")
             .stream().collect(Collectors.toMap(
                     i -> i,
                     i -> Literal.parseLiteral(i)));
@@ -227,6 +228,8 @@ public class HouseEnv extends Environment {
             result = model.dishwasherOn();
         } else if (action.getFunctor().equals("take") && action.getTerm(0).toString().equals("plate")) {
             result = model.takePlateOwner();
+        } else if (action.equals(LITERALS.get("recycle(owner,beer)"))) {
+            result = model.recycleBeer();
         } else {
             logger.info("Failed to execute action " + action);
         }

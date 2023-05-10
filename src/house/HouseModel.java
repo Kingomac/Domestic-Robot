@@ -26,6 +26,7 @@ public class HouseModel extends GridWorldModel {
     boolean carryingDelivery = false; // si el storekeeper está llevando una entrega
     boolean burningTrash = false;
     boolean namOrSip = false;
+    boolean canDropBeer = true;
     DishwasherStates dishwasherState = DishwasherStates.OFF;
     int carryingDishDirty = 0; // si el robot está llevando un plato limpio o sucio
     int carryingDishClean = 0;
@@ -205,7 +206,7 @@ public class HouseModel extends GridWorldModel {
         if (sipCount > 0) {
             sipCount--;
             if (sipCount == 0)
-                dropBeer();
+                canDropBeer = true;
             if (view != null)
                 view.update(Places.OWNER.x, Places.OWNER.y);
             return true;
@@ -248,6 +249,9 @@ public class HouseModel extends GridWorldModel {
      * @return
      */
     boolean dropBeer() {
+        if (!canDropBeer)
+            return true;
+        canDropBeer = false;
         int posX = 3;
         int posY = 2;
 
@@ -262,6 +266,13 @@ public class HouseModel extends GridWorldModel {
 
         System.out.println("dropped beer: " + posX + ", " + posY);
 
+        return true;
+    }
+
+    boolean recycleBeer() {
+        binCount++;
+        if (view != null)
+            view.update(Places.BIN.x, Places.BIN.y);
         return true;
     }
 
