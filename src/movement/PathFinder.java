@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import house.HouseModel;
-import house.SpecializedRobots;
+import house.MobileAgents;
 import java.util.LinkedList;
 import java.util.Collections;
 import jason.environment.grid.Location;
@@ -51,7 +51,7 @@ public class PathFinder {
     this.model = model;
   }
 
-  public Location getNextPosition(Location origen, Location destino, SpecializedRobots me) {
+  public Location getNextPosition(Location origen, Location destino, MobileAgents me) {
 
     // Crear matriz con datos de cada celda, se inicializa con
     // la distancia Manhattan de cada celda al destino
@@ -150,7 +150,7 @@ public class PathFinder {
    * @param pos
    * @return
    */
-  private List<Location> getFreeAdjacentPositions(Location pos, Location destino, SpecializedRobots me) {
+  private List<Location> getFreeAdjacentPositions(Location pos, Location destino, MobileAgents me) {
     List<Location> toret = new LinkedList<>();
     if (model.inGrid(pos.x + 1, pos.y)
         && (model.robotCanGo(me, pos.x + 1, pos.y) || destino.equals(new Location(pos.x + 1, pos.y))))

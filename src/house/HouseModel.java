@@ -1,10 +1,8 @@
 package house;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Stream;
 
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
@@ -51,10 +49,10 @@ public class HouseModel extends GridWorldModel {
          * 1 -> robot especializado en mover cervezas de delivery a cervezas
          * 2 -> robot especializado en recoger latas
          **/
-        super(GSize, GSize, SpecializedRobots.values().length); // (tamaño, tamaño, número de agentes móviles)
+        super(GSize, GSize, MobileAgents.values().length + 1); // (tamaño, tamaño, n_robots + 1_owner)
 
         // inicializar posiciones de los robots
-        for (SpecializedRobots rob : SpecializedRobots.values())
+        for (MobileAgents rob : MobileAgents.values())
             setAgPos(rob.getValue(), rob.base.x, rob.base.y);
 
         // inicializar elementos no móviles
@@ -79,9 +77,9 @@ public class HouseModel extends GridWorldModel {
         }
     }
 
-    public boolean isThereOtherRobot(SpecializedRobots me, Location loc) {
+    public boolean isThereOtherRobot(MobileAgents me, Location loc) {
 
-        for (SpecializedRobots rob : SpecializedRobots.values()) {
+        for (MobileAgents rob : MobileAgents.values()) {
             Location pos = getAgPos(rob.getValue());
             if (rob.equals(me))
                 continue;
@@ -93,7 +91,7 @@ public class HouseModel extends GridWorldModel {
         // return ag != -1 && ag != me.getValue();
     }
 
-    public boolean isThereOtherRobot(SpecializedRobots me, int x, int y) {
+    public boolean isThereOtherRobot(MobileAgents me, int x, int y) {
         return isThereOtherRobot(me, new Location(x, y));
     }
 
@@ -168,19 +166,6 @@ public class HouseModel extends GridWorldModel {
     }
 
     /**
-     * Dar una cerveza al owner_musk
-     * 
-     * @return
-     */
-    boolean handInBeerMusk() {
-        sipCountMusk = 10;
-        carryingBeer = false;
-        // if (view != null)
-        // view.update(Places.OWNER_MUSK.x, Places.OWNER_MUSK.y);
-        return true;
-    }
-
-    /**
      * El storekeeper coge las cervezas de la zona delivery
      * 
      * @return
@@ -242,22 +227,6 @@ public class HouseModel extends GridWorldModel {
     }
 
     /**
-     * El owner_musk sorbe la cerveza
-     * 
-     * @return
-     */
-    boolean sipBeerMusk() {
-        if (sipCountMusk > 0) {
-            sipCountMusk--;
-            // if (view != null)
-            // view.update(Places.OWNER_MUSK.x, Places.OWNER_MUSK.y);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Comprueba si una posición está ocupada por un elemento estático
      * 
      * @param x
@@ -302,7 +271,7 @@ public class HouseModel extends GridWorldModel {
      * @return
      */
     boolean takeTrash() {
-        Location lCleaner = getAgPos(SpecializedRobots.CLEANER.getValue());
+        Location lCleaner = getAgPos(MobileAgents.CLEANER.getValue());
         Location near = trash.stream().filter(x -> lCleaner.distanceManhattan(x) <= 2).findFirst().orElse(null);
         if (near == null) {
             System.out.println("NEAR IS NULL");
@@ -320,7 +289,7 @@ public class HouseModel extends GridWorldModel {
      * @return
      */
     boolean dropTrash() {
-        Location lCleaner = getAgPos(SpecializedRobots.CLEANER.getValue());
+        Location lCleaner = getAgPos(MobileAgents.CLEANER.getValue());
         if (lCleaner.distanceManhattan(Places.BIN.location) > 1)
             return false;
         carryingTrash = false;
@@ -337,7 +306,7 @@ public class HouseModel extends GridWorldModel {
      * @param dest localización del destino
      * @return
      */
-    boolean moveRobot(SpecializedRobots tipo, String dest) {
+    boolean moveAgent(MobileAgents tipo, String dest) {
         Location origen = getAgPos(tipo.getValue());
 
         if (dest.equals("up")) {
@@ -354,7 +323,7 @@ public class HouseModel extends GridWorldModel {
         return true;
     }
 
-    boolean moveRobot(SpecializedRobots tipo, MovementDirections dir) {
+    boolean moveAgent(MobileAgents tipo, MovementDirections dir) {
         Location origen = getAgPos(tipo.getValue());
 
         if (dir.equals(MovementDirections.UP))
@@ -370,8 +339,7 @@ public class HouseModel extends GridWorldModel {
         return true;
     }
 
-    boolean moveRobot(SpecializedRobots tipo, Location dest) {
-
+    boolean moveAgent(MobileAgents tipo, Location dest) {
         setAgPos(tipo.getValue(), dest);
         return true;
     }
@@ -385,7 +353,7 @@ public class HouseModel extends GridWorldModel {
         binCount = 0;
         burningTrash = true;
         if (view != null) {
-            Location rob = getAgPos(SpecializedRobots.BURNER.getValue());
+            Location rob = getAgPos(MobileAgents.BURNER.getValue());
             view.update(rob.x, rob.y);
             view.update(Places.BIN.x, Places.BIN.y);
         }
@@ -401,7 +369,7 @@ public class HouseModel extends GridWorldModel {
         carryingTrash = false;
         burningTrash = false;
         if (view != null) {
-            Location rob = getAgPos(SpecializedRobots.BURNER.getValue());
+            Location rob = getAgPos(MobileAgents.BURNER.getValue());
             view.update(rob.x, rob.y);
         }
         return true;
@@ -451,7 +419,7 @@ public class HouseModel extends GridWorldModel {
         return true;
     }
 
-    public boolean robotCanGo(SpecializedRobots me, Location pos) {
+    public boolean robotCanGo(MobileAgents me, Location pos) {
         for (Location t : trash) {
             if (t.equals(pos))
                 return false;
@@ -463,7 +431,7 @@ public class HouseModel extends GridWorldModel {
         return (isFreeOfObstacle(pos) && !isThereOtherRobot(me, pos));
     }
 
-    public boolean robotCanGo(SpecializedRobots me, int posX, int posY) {
+    public boolean robotCanGo(MobileAgents me, int posX, int posY) {
         Location loc = new Location(posX, posY);
         return robotCanGo(me, loc);
     }

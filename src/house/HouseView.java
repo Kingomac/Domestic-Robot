@@ -87,10 +87,11 @@ public class HouseView extends GridWorldView {
 
     @Override
     public void drawAgent(Graphics g, int x, int y, Color c, int id) {
-        Location lRobot = hmodel.getAgPos(SpecializedRobots.ROBOT.getValue());
-        Location lCleaner = hmodel.getAgPos(SpecializedRobots.CLEANER.getValue());
-        Location lStorekeeper = hmodel.getAgPos(SpecializedRobots.STOREKEEPER.getValue());
-        Location lBurner = hmodel.getAgPos(SpecializedRobots.BURNER.getValue());
+        Location lRobot = hmodel.getAgPos(MobileAgents.ROBOT.getValue());
+        Location lCleaner = hmodel.getAgPos(MobileAgents.CLEANER.getValue());
+        Location lStorekeeper = hmodel.getAgPos(MobileAgents.STOREKEEPER.getValue());
+        Location lBurner = hmodel.getAgPos(MobileAgents.BURNER.getValue());
+        Location lOwner = hmodel.getAgPos(MobileAgents.OWNER.getValue());
 
         if (x == lRobot.x && y == lRobot.y) { // Dibujar robot mayordomo
             if (!lRobot.equals(Places.OWNER.location) && !lRobot.equals(Places.FRIDGE.location)) {
@@ -125,6 +126,11 @@ public class HouseView extends GridWorldView {
             super.drawAgent(g, x, y, c, -1);
             g.setColor(Color.black);
             super.drawString(g, x, y, defaultFont, "Burner");
+        } else if (x == lOwner.x && y == lOwner.y) {
+            c = Color.MAGENTA;
+            super.drawAgent(g, x, y, c, id);
+            g.setColor(Color.black);
+            super.drawString(g, x, y, defaultFont, "Owner");
         }
 
     }
