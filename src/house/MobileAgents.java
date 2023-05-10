@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
  * Identificación de los distintos robots
  */
 public enum MobileAgents {
-  ROBOT(0, Places.BASE_ROBOT, "robot"),
-  CLEANER(1, Places.BASE_CLEANER, "robot"),
-  STOREKEEPER(2, Places.BASE_STOREKEEPER, "robot"),
-  BURNER(3, Places.BASE_BURNER, "robot"),
-  OWNER(4, Places.OWNER, "owner");
+  ROBOT(0, Places.BASE_ROBOT, "robot", false),
+  CLEANER(1, Places.BASE_CLEANER, "robot", false),
+  STOREKEEPER(2, Places.BASE_STOREKEEPER, "robot", false),
+  BURNER(3, Places.BASE_BURNER, "robot", false),
+  OWNER(4, Places.OWNER, "owner", true);
 
   /**
    * "ROBOT" -> MobileAgents.ROBOT
@@ -35,11 +35,13 @@ public enum MobileAgents {
   private final int value;
   public final Places base;
   public final String agentName;
+  public final boolean isOwner;
 
-  private MobileAgents(int v, Places base, String agentName) {
+  private MobileAgents(int v, Places base, String agentName, boolean isOwner) {
     this.value = v;
     this.base = base;
     this.agentName = agentName;
+    this.isOwner = isOwner;
   }
 
   public int getValue() {

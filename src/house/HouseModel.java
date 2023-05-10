@@ -431,6 +431,8 @@ public class HouseModel extends GridWorldModel {
     }
 
     public boolean robotCanGo(MobileAgents me, Location pos) {
+        if (me.isOwner && pos.equals(me.base.location))
+            return true;
         for (Location t : trash) {
             if (t.equals(pos))
                 return false;

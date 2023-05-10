@@ -82,7 +82,12 @@ public class HouseEnv extends Environment {
             MobileAgents.AGENTS.forEach(i -> addPercept(i,
                     Literal.parseLiteral(String.format("where(%s,%d,%d)", pl.name().toLowerCase(), pl.x, pl.y))));
             for (MobileAgents robot : MobileAgents.values()) {
-                if (model.getAgPos(robot.getValue()).distanceManhattan(pl.location) <= pl.minDist) {
+                if (!pl.equals(robot.base)
+                        && model.getAgPos(robot.getValue()).distanceManhattan(pl.location) <= pl.minDist) {
+                    addPercept(robot.agentName, Literal.parseLiteral(
+                            String.format("at(%s, %s)", robot.name().toLowerCase(), pl.name().toLowerCase())));
+                } else if (pl.equals(robot.base)
+                        && model.getAgPos(robot.getValue()).distanceManhattan(pl.location) < 1) {
                     addPercept(robot.agentName, Literal.parseLiteral(
                             String.format("at(%s, %s)", robot.name().toLowerCase(), pl.name().toLowerCase())));
                 }
