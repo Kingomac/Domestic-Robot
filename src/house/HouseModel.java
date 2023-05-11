@@ -172,14 +172,11 @@ public class HouseModel extends GridWorldModel {
      * @return
      */
     boolean getDelivered() {
-        if (deliveryBeers >= 3 && !carryingDelivery) {
-            carryingDelivery = true;
-            deliveryBeers -= 3;
-            if (view != null)
-                view.update(Places.DELIVERY.x, Places.DELIVERY.y);
-            return true;
-        }
-        return false;
+        carryingDelivery = true;
+        deliveryBeers -= 3;
+        if (view != null)
+            view.update(Places.DELIVERY.x, Places.DELIVERY.y);
+        return true;
     }
 
     /**

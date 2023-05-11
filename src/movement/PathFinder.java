@@ -18,7 +18,7 @@ public class PathFinder {
     public Celda() {
       this.f = Integer.MAX_VALUE;
       this.h = Integer.MAX_VALUE;
-      this.g = 100;
+      this.g = 0;
       this.padre_i = -1;
       this.padre_j = -1;
     }
