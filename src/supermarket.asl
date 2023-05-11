@@ -18,13 +18,14 @@ last_order_id(1). // initial belief
 			?profit(Profit);
 			.random(S);
 			+offer(Prod,Precio * (Profit + 1), math.round((S + 1) * 5));
+			+offer_noprofit(Prod, Precio, math.round((S + 1) * 5));
 			.send(robot, tell, offer(Prod,Precio * Profit, math.round((S + 1) * 5)));
 		}; !make_discount.
 
 
 /** Cada cierto tiempo hace un descuento **/
 +!make_discount : price_lower(Mult) <-
-		.wait(10000);
+		.wait(20000);
 		?profit(P);
 		-+profit(P * Mult);
 		!make_discount. 
@@ -46,12 +47,17 @@ last_order_id(1). // initial belief
 /** Si se queda sin stock lo recarga **/
 +offer(Producto, Precio, Cantidad) : Cantidad <= 0 & 
 	money(Money) & proveedor(Producto, PrecioProv) & Money >= PrecioProv <-
-	-+money(Money - PrecioProv * 10); ?profit(Profit); -+offer(Producto, PrecioProv * Profit, Cantidad + 10).
+	-+money(Money - PrecioProv * 10); ?profit(Profit); -+offer(Producto, PrecioProv * (Profit+1), Cantidad + 10).
 
 /** Cuando recibe un pago incrementa el precio de la cerveza **/
 +payment(_, _, P) : money(M) & price_rise(MULT) & profit(Profit) <- -+money(P + M); -+profit(Profit * MULT).
 
-		
++profit(Prof) <- for(offer_noprofit(Prod, Precio, Stock)) {
+		-offer(Prod,_,_);
+		+offer(Prod,Precio * (Prof+1),Stock)
+	}.
+
+
 +msg(M)[source(Ag)] : true
    <- .print("Message from ",Ag,": ",M);
       -msg(M).
