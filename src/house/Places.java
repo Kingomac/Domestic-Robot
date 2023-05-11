@@ -18,13 +18,11 @@ enum Places {
   BASE_BURNER(new Location(HouseModel.GSize / 2, HouseModel.GSize - 1), -1, 0, true);
 
   public Location location;
-  public Location robotLoc;
   public int x;
   public int y;
   public final int gridConst;
   public final int minDist;
   public final boolean canGoThrough;
-  public final boolean isOwnerSofa;
 
   private Places(Location loc) {
     location = loc;
@@ -33,7 +31,6 @@ enum Places {
     y = loc.y;
     minDist = 1;
     canGoThrough = false;
-    isOwnerSofa = false;
   }
 
   private Places(Location loc, int gridConst) {
@@ -43,7 +40,6 @@ enum Places {
     y = loc.y;
     minDist = 1;
     canGoThrough = false;
-    isOwnerSofa = false;
   }
 
   private Places(Location loc, int gridConst, int minDist) {
@@ -53,7 +49,6 @@ enum Places {
     y = loc.y;
     this.minDist = minDist;
     canGoThrough = false;
-    isOwnerSofa = false;
   }
 
   private Places(Location loc, int gridConst, int minDist, boolean canGoThrough) {
@@ -63,7 +58,6 @@ enum Places {
     y = loc.y;
     this.minDist = minDist;
     this.canGoThrough = canGoThrough;
-    isOwnerSofa = false;
   }
 
   private Places(Location loc, int gridConst, int minDist, boolean canGoThrough, boolean isOwnerSofa) {
@@ -73,7 +67,6 @@ enum Places {
     y = loc.y;
     this.minDist = minDist;
     this.canGoThrough = canGoThrough;
-    this.isOwnerSofa = isOwnerSofa;
   }
 
   /**
