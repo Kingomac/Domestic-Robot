@@ -153,16 +153,16 @@ public class PathFinder {
   private List<Location> getFreeAdjacentPositions(Location pos, Location destino, MobileAgents me) {
     List<Location> toret = new LinkedList<>();
     if (model.inGrid(pos.x + 1, pos.y)
-        && (model.robotCanGo(me, pos.x + 1, pos.y) || destino.equals(new Location(pos.x + 1, pos.y))))
+        && (model.agentCanGo(me, pos.x + 1, pos.y) || destino.equals(new Location(pos.x + 1, pos.y))))
       toret.add(new Location(pos.x + 1, pos.y));
     if (model.inGrid(pos.x - 1, pos.y)
-        && (model.robotCanGo(me, pos.x - 1, pos.y) || destino.equals(new Location(pos.x - 1, pos.y))))
+        && (model.agentCanGo(me, pos.x - 1, pos.y) || destino.equals(new Location(pos.x - 1, pos.y))))
       toret.add(new Location(pos.x - 1, pos.y));
     if (model.inGrid(pos.x, pos.y - 1)
-        && (model.robotCanGo(me, pos.x, pos.y - 1) || destino.equals(new Location(pos.x, pos.y - 1))))
+        && (model.agentCanGo(me, pos.x, pos.y - 1) || destino.equals(new Location(pos.x, pos.y - 1))))
       toret.add(new Location(pos.x, pos.y - 1));
     if (model.inGrid(pos.x, pos.y + 1)
-        && (model.robotCanGo(me, pos.x, pos.y + 1) || destino.equals(new Location(pos.x, pos.y + 1))))
+        && (model.agentCanGo(me, pos.x, pos.y + 1) || destino.equals(new Location(pos.x, pos.y + 1))))
       toret.add(new Location(pos.x, pos.y + 1));
 
     return toret;

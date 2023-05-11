@@ -172,7 +172,7 @@ public class HouseEnv extends Environment {
             result = model.closeFridge();
 
         } else if (action.getFunctor().equals("next_direction")) {
-        } else if (action.getFunctor().equals("move_robot")) {
+        } else if (action.getFunctor().equals("move_agent")) {
             String robot = action.getTerm(0).toString();
 
             MobileAgents tipo;

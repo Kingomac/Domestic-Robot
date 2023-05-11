@@ -78,7 +78,7 @@ public class HouseModel extends GridWorldModel {
         }
     }
 
-    public boolean isThereOtherRobot(MobileAgents me, Location loc) {
+    public boolean isThereOtherAgent(MobileAgents me, Location loc) {
 
         for (MobileAgents rob : MobileAgents.values()) {
             Location pos = getAgPos(rob.getValue());
@@ -92,8 +92,8 @@ public class HouseModel extends GridWorldModel {
         // return ag != -1 && ag != me.getValue();
     }
 
-    public boolean isThereOtherRobot(MobileAgents me, int x, int y) {
-        return isThereOtherRobot(me, new Location(x, y));
+    public boolean isThereOtherAgent(MobileAgents me, int x, int y) {
+        return isThereOtherAgent(me, new Location(x, y));
     }
 
     /**
@@ -430,7 +430,7 @@ public class HouseModel extends GridWorldModel {
         return true;
     }
 
-    public boolean robotCanGo(MobileAgents me, Location pos) {
+    public boolean agentCanGo(MobileAgents me, Location pos) {
         if (me.isOwner && pos.equals(me.base.location))
             return true;
         for (Location t : trash) {
@@ -441,12 +441,12 @@ public class HouseModel extends GridWorldModel {
             if (p.location.equals(pos) && !p.canGoThrough)
                 return false;
         }
-        return (isFreeOfObstacle(pos) && !isThereOtherRobot(me, pos));
+        return (isFreeOfObstacle(pos) && !isThereOtherAgent(me, pos));
     }
 
-    public boolean robotCanGo(MobileAgents me, int posX, int posY) {
+    public boolean agentCanGo(MobileAgents me, int posX, int posY) {
         Location loc = new Location(posX, posY);
-        return robotCanGo(me, loc);
+        return agentCanGo(me, loc);
     }
 
     public boolean makePinchos() {

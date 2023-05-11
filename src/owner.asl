@@ -10,7 +10,7 @@ favorite(pincho, durum).
 
 +!go_to(Tipo, Sitio) : not where(Sitio, X, Y) <- .print("El sitio ", Sitio, " no existe"); .wait(where(Sitio, _, _)); !go_to(Tipo, Sitio).
 +!go_to(Tipo, Sitio) : at(Tipo, Sitio) <- true.
-+!go_to(Tipo, Sitio) : not at(Tipo, Sitio) & where(Sitio, DestX,DestY) & at(Tipo, OrigenX, OrigenY) <- movement.NextDirection(OrigenX,OrigenY,DestX,DestY,Tipo,AA); move_robot(Tipo, AA); !go_to(Tipo, Sitio).
++!go_to(Tipo, Sitio) : not at(Tipo, Sitio) & where(Sitio, DestX,DestY) & at(Tipo, OrigenX, OrigenY) <- movement.NextDirection(OrigenX,OrigenY,DestX,DestY,Tipo,AA); move_agent(Tipo, AA); !go_to(Tipo, Sitio).
 -!go_to(Tipo, Sitio) <- .print(Tipo, " can't !go_to ", Sitio); .wait(3000); !go_to(Tipo, Sitio).
 
 
@@ -25,10 +25,7 @@ favorite(pincho, durum).
 +has(owner,beer) : true
    <- !drink(beer).
 -has(owner,beer) : true
-   <- 	///////
-   		//drop(beer);
-		///////
-   		!get(beer).
+   <- !get(beer).
 
 // if I have not beer finish, in other case while I have beer, sip
 +!drink(beer) : not has(owner,beer) & .random(Rand) & Rand < 0.5
