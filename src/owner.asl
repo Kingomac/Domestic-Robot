@@ -34,16 +34,12 @@ favorite(pincho, durum).
 
 +!give(Owner,beer): not too_much(Owner, beer)
    <- !go_to(owner,fridge);
-   		.print("WENT TO FRIDGE");
       !get_when_available(beer);
-	  .print("GOT BEER");
 	  !get_when_available(pincho);
-	  .print("GOT PINCHO");
       close(fridge);
       !go_to(owner,owner);
       hand_in(Owner,beer);
 	  hand_in(Owner,pincho);
-	  .print("HANDED IN");
       // remember that another beer has been consumed
       .date(YY,MM,DD); .time(HH,NN,SS);
       .send(robot,tell,consumed(Owner,YY,MM,DD,HH,NN,SS,beer)).
