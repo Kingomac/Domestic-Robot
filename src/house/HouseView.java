@@ -10,12 +10,12 @@ import java.awt.Graphics;
 public class HouseView extends GridWorldView {
 
     HouseModel hmodel;
-    private final static int WINDOW_SIZE = 1000;
+    private final static int WINDOW_SIZE = 800;
 
     public HouseView(HouseModel model) {
         super(model, "Domestic Robot", WINDOW_SIZE);
         hmodel = model;
-        defaultFont = new Font("Arial", Font.BOLD, 12000 / WINDOW_SIZE); // change default font
+        defaultFont = new Font("Arial", Font.BOLD, 7500 / WINDOW_SIZE); // change default font
         setResizable(false);
         setVisible(true);
         repaint();
@@ -28,7 +28,7 @@ public class HouseView extends GridWorldView {
         switch (object) {
             case HouseModel.FRIDGE:
                 g.setColor(Color.black);
-                drawString(g, x, y, new Font("Arial", Font.BOLD, 11000 / WINDOW_SIZE),
+                drawString(g, x, y, defaultFont,
                         "Fridge B=" + hmodel.availableBeers + "P=" + hmodel.availablePinchos);
                 break;
             case HouseModel.OWNER:
@@ -125,10 +125,10 @@ public class HouseView extends GridWorldView {
             g.setColor(Color.black);
             String ownertext = "Owner";
             if (hmodel.sipCount > 0 && !hmodel.namOrSip) {
-                ownertext += " Sip (" + hmodel.sipCount + ")";
+                ownertext += " Sip(" + hmodel.sipCount + ")";
             }
             if (hmodel.namCount > 0 && hmodel.namOrSip) {
-                ownertext += " Ñam (" + hmodel.namCount + ")";
+                ownertext += " Ñam(" + hmodel.namCount + ")";
             }
             super.drawString(g, x, y, defaultFont, ownertext);
         }

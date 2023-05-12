@@ -5,6 +5,8 @@ import jason.environment.Environment;
 import jason.environment.grid.Location;
 import movement.MovementDirections;
 import movement.NextDirection;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -113,17 +115,18 @@ public class HouseEnv extends Environment {
             addPercept("robot", Literal.parseLiteral("bin(full)"));
 
         // El robot cuando está en la nevera puede ver cuantas cervezas quedan
-        Location lRobot = model.getAgPos(MobileAgents.ROBOT.getValue());
-        if (Places.FRIDGE.location.distanceManhattan(lRobot) <= 1) { // Si está en la nevera puede ver cuantas quedan
-            addPercept("robot",
-                    Literal.parseLiteral(String.format("available(fridge, beer, %d)", model.availableBeers)));
-            addPercept("robot",
-                    Literal.parseLiteral(String.format("available(fridge, tapa, %d)", model.availableTapas)));
-            addPercept("robot",
-                    Literal.parseLiteral(String.format("available(fridge, pincho, %d)", model.availablePinchos)));
-            if (model.availableBeers > 0)
-                addPercept("robot", Literal.parseLiteral("available(fridge, beer)"));
-        }
+        Arrays.stream(MobileAgents.values()).forEach(i -> {
+            if (model.getAgPos(i.getValue()).distanceManhattan(Places.FRIDGE.location) <= 1) {
+                addPercept(i.agentName,
+                        Literal.parseLiteral(String.format("available(fridge, beer, %d)", model.availableBeers)));
+                addPercept(i.agentName,
+                        Literal.parseLiteral(String.format("available(fridge, tapa, %d)", model.availableTapas)));
+                addPercept(i.agentName,
+                        Literal.parseLiteral(String.format("available(fridge, pincho, %d)", model.availablePinchos)));
+                if (model.availableBeers > 0)
+                    addPercept(i.agentName, Literal.parseLiteral("available(fridge, beer)"));
+            }
+        });
 
         // has(owner,beer)
         if (model.sipCount > 0) {

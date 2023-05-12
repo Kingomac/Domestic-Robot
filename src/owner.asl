@@ -19,8 +19,42 @@ favorite(pincho, durum).
 }.
 // Darle dinero al robot si se lo pide
 +!ask_money(Ag) : money(X) & X > 0 <- .send(Ag, achieve, save_money(X * 0.5)); -+money(X * 0.5).
++!get(beer): not .intend(get(beer)) & .random(Rand) & Rand < 0.25 <-.send(robot,askOne, too_much(owner,beer),A); !get_dish_for_pincho; !give(owner,beer).
 +!get(beer) : true
    <- .send(robot, tell, bring(beer)).
+
+/** Puede coger una cerveza y un pincho por si mismo **/ 
++!get_dish_for_pincho <- !go_to(owner, cupboard); get(dish, cupboard).
++!get_when_available(pincho): available(fridge, pincho, N) & N > 0 <- true.
++!get_when_available(pincho): available(fridge, pincho, NP) 
+	& NP <= 0 & available(fridge, tapa, NT) & NT > 0 <-  make(pinchos); .wait(2000).
++!get_when_available(pincho): available(fridge, pincho, NP) 
+	& NP <= 0 & available(fridge, tapa, NT) & NT <= 0 <-  .wait(200); !get_when_available.
+
++!give(Owner,beer): not too_much(Owner, beer)
+   <- !go_to(owner,fridge);
+   		.print("WENT TO FRIDGE");
+      !get_when_available(beer);
+	  .print("GOT BEER");
+	  !get_when_available(pincho);
+	  .print("GOT PINCHO");
+      close(fridge);
+      !go_to(owner,owner);
+      hand_in(Owner,beer);
+	  hand_in(Owner,pincho);
+	  .print("HANDED IN");
+      // remember that another beer has been consumed
+      .date(YY,MM,DD); .time(HH,NN,SS);
+      .send(robot,tell,consumed(Owner,YY,MM,DD,HH,NN,SS,beer)).
++!give(Owner,beer): too_much(Owner,beer) <- .print("I am not allowed to drink more beer today :(").
+-!give(_,_)
+   :  true
+   <- .current_intention(I);
+      .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
+	  
+/** Si no hay cerveza en la nevera se queda esperando a que haya **/
++!get_when_available(beer) : available(fridge, beer) <- .wait(100); open(fridge); get(beer).
++!get_when_available(beer) : not available(fridge, beer) <- .wait({ +available(fridge,beer) }); !get_when_available(beer). 
 
 +has(owner,beer) : true
    <- !drink(beer).
