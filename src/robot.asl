@@ -63,7 +63,7 @@ terminar para llevarle cerveza a otro **/
 +!get_when_available(pincho): available(fridge, pincho, NP) 
 	& NP <= 0 & available(fridge, tapa, NT) & NT > 0 <-  make(pinchos); .wait(2000).
 +!get_when_available(pincho): available(fridge, pincho, NP) 
-	& NP <= 0 & available(fridge, tapa, NT) & NT <= 0 <-  .wait(200); !get_when_available.
+	& NP <= 0 & available(fridge, tapa, NT) & NT <= 0 <-  .wait(200); !get_when_available(pincho).
 
 /** Acción de coger y llevarle al owner correspondiente la cerveza **/
 +!give(Owner,beer)

@@ -33,7 +33,7 @@ public class HouseEnv extends Environment {
             "get(delivery)", "save(beer)", "drop(beer)", "take(trash)", "drop(trash)",
             "make(pinchos)", "get(dish,cupboard)", "nam(pincho)", "empty(bin)", "drop(bin)",
             "put(dish,dishwasher)", "put(dish,cupboard)", "get(dish,dishwasher)", "dishwasher(on)",
-            "recycle(owner,beer)")
+            "recycle(owner,beer)", "bin(full)", "available(fridge,beer)")
             .stream().collect(Collectors.toMap(
                     i -> i,
                     i -> Literal.parseLiteral(i)));
@@ -42,7 +42,7 @@ public class HouseEnv extends Environment {
 
     private HouseModel model; // the model of the grid
     private Map<String, Double> precioProveedor;
-    private double[] priceMultipliers = { 0.992, 0.997, 1.002, 1.004 };
+    private double[] priceMultipliers = { 0.992, 0.997, 1.002, 1.004, 1.008 };
 
     @Override
     public void init(String[] args) {
@@ -112,7 +112,7 @@ public class HouseEnv extends Environment {
 
         // Detecta si el cubo de basura está llena
         if (model.binCount >= 5)
-            addPercept("robot", Literal.parseLiteral("bin(full)"));
+            addPercept("robot", LITERALS.get("bin(full)"));
 
         // El robot cuando está en la nevera puede ver cuantas cervezas quedan
         Arrays.stream(MobileAgents.values()).forEach(i -> {
@@ -124,7 +124,7 @@ public class HouseEnv extends Environment {
                 addPercept(i.agentName,
                         Literal.parseLiteral(String.format("available(fridge, pincho, %d)", model.availablePinchos)));
                 if (model.availableBeers > 0)
-                    addPercept(i.agentName, Literal.parseLiteral("available(fridge, beer)"));
+                    addPercept(i.agentName, LITERALS.get("available(fridge,beer)"));
             }
         });
 
@@ -140,6 +140,7 @@ public class HouseEnv extends Environment {
 
         addPercept("robot", Literal.parseLiteral(String.format("cupboard(dish,%d)", model.cupboardCount)));
 
+        // Gestión estados dishwasher
         switch (model.dishwasherState) {
             case ON:
                 dishwasherCycles--;
@@ -156,6 +157,7 @@ public class HouseEnv extends Environment {
                 break;
         }
 
+        // proveedor(Producto,Precio)
         precioProveedor.forEach((key, val) -> {
             double r = priceMultipliers[(int) Math.floor(Math.random() * priceMultipliers.length)];
             precioProveedor.put(key, val * r);

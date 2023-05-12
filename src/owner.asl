@@ -19,7 +19,8 @@ favorite(pincho, durum).
 }.
 // Darle dinero al robot si se lo pide
 +!ask_money(Ag) : money(X) & X > 0 <- .send(Ag, achieve, save_money(X * 0.5)); -+money(X * 0.5).
-+!get(beer): not .intend(get(beer)) & .random(Rand) & Rand < 0.25 <-.send(robot,askOne, too_much(owner,beer),A); !get_dish_for_pincho; !give(owner,beer).
++!get(beer): .intend(drink(beer)) <- .wait(100); !get(beer).
++!get(beer): not .intend(get_dish_for_pincho) & not .intend(give(owner,beer)) & .random(Rand) & Rand < 0.25 <-.send(robot,askOne, too_much(owner,beer),A); !get_dish_for_pincho; !give(owner,beer).
 +!get(beer) : true
    <- .send(robot, tell, bring(beer)).
 
@@ -53,7 +54,7 @@ favorite(pincho, durum).
       .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
 	  
 /** Si no hay cerveza en la nevera se queda esperando a que haya **/
-+!get_when_available(beer) : available(fridge, beer) <- .wait(100); open(fridge); get(beer).
++!get_when_available(beer) : available(fridge, beer) & available(fridge, beer, N) <- .wait(100); open(fridge); get(beer); .send(robot, tell, available(fridge, beer, N-1)).
 +!get_when_available(beer) : not available(fridge, beer) <- .wait({ +available(fridge,beer) }); !get_when_available(beer). 
 
 +has(owner,beer) : true
