@@ -39,49 +39,48 @@
 
 ## Elementos participantes del proyecto
   ### Zonas
-- **Papelera**: Almacena toda la basura generada por un Owner. Esta cuenta con una capacidad de 5 latas, y una vez que se llene, se vaciará gracias al robot Burner.
-- **Delivery**: En esta zona, el StoreKeeper decide a qué supermercado comprarle los productos. Para decidir en que supermercado se hace la compra, el robot StoreKeeper tiene en cuenta cual es la marca favorita, cual es el precio más barato y si hay suficiente stock de ese producto. Si no hubiese suficiente cantidad, comprará las unidades restantes en otro Supermecado. Una vez recibidos los productos, el robot los recoge y los deposita en la Fridge.
-- **Nevera**: En ésta zona, es donde se guardan tanto las cervezas, como los pinchos y las tapas de las que salen los pinchos, aquí, es donde el MyRobot viene a por las cervezas y pinchos para lleva al Owner y a hacer a partir de las tapas, los pinchos correspondientes, ademá, es aquí donde el storekeeper guarda las cervezas que compra en la zona de deliver
-- **Lavavajillas**: Cada vez que el Owner come un pincho, ensucia un plato, así que MyRobot va a por ese plato y lo guarda en el lavavajillas, que, una vez se llene, en nuestro caso con 6 platos, el lavavajillas comenzará a funcionar, y una vez termine, se supone que el lavavajillas habrá terminado.
-- **Alacena**: Agente encargado de almacenar una cantidad de platos limpios, necesarios para la fabricación de los pinchos, éstos platos son los que MyRobot saca del lavavajillas una vez éste termine.
+- **Papelera**: Almacena toda la basura generada por un Owner. Esta cuenta con una capacidad de 5 latas, y una vez que se llene, el robot Burner irá a vaciarla.
+- **Delivery**: En esta zona, el StoreKeeper, realiza la compra de productos, eligiendo siempre los favoritos y comprando la cantidad disponible en el supermercado más barato hasta conseguir 3 cervezas y 1 tapa. En caso de que el supermercado no tenga stock suficiente, compra el stock disponible y continúa comprando en el siguiente supermercado más barato. Después de un tiempo, se entregan los productos y el robot los recoge y guarda en la nevera.
+- **Nevera**: En esta zona, es donde se guardan tanto las cervezas, como los pinchos y las tapas. Aquí, tanto MyRobot como el Owner pueden coger cervezas, pinchos y tapas. También la usa el StoreKeeper para guardar los productos comprados.
+- **Lavavajillas**: Cada vez que el Owner come un pincho, ensucia un plato, así que MyRobot va a por ese plato y lo guarda en el lavavajillas, que, una vez se llene, en nuestro caso con 6 platos, el robot encenderá el lavavajillas, y una vez termine, se podrán recoger los platos limpios.
+- **Alacena**: zona en la que se almacenan los platos limpios, con una capacidad de 8 platos. Se utilizan para servir pinchos al Owner, luego se meten en el lavavajillas y una vez estén limpios se guardan de nuevo en la alacena.
 
 <img src="foto-grid.png" style="zoom: 50%;" />
 
 ### Agentes
 #### Owner
-Solicita cervezas para consumirlas y posteriormente tira al escenario las latas de cerveza. Estas latas se tiran al entorno de forma aleatoria. Este agente cuenta con una cantidad de dinero de partida, de la cual la mitad es suministrada al robot para que éste realice la compra de cervezas.
-El Owner además, tiene la capacidad de levantarse e ir a la nevera a por la cerveza, ésto sucede de manera aleatoria, haciendo que el robot encargado de ésta tarea no la tenga que hacer.
+El Owner desea disfrutar de cerveza y pinchos, los cuales tiene productos específicos que son sus favoritos. Para lograrlo, puede solicitarlos al robot o atenderse por sí mismo. Estas consumiciones siempre tienen lugar en su sofá, donde el robot le llevaría la cerveza o donde él mismo toma las cervezas que coge. Una vez terminado, queda con un plato sucio y una lata de cerveza vacía. Los platos serán recogidos siempre por el robot, mientras que las latas puede tirarlas en una posición aleatoria de la vivienda o puede levantarse y tirarlas a la basura.
 
-1. Sus creencias inciales son el dinero que tiene y sus preferencias.
+1. Sus creencias iniciales son el dinero que tiene y sus preferencias de cerveza y pincho.
 ```prolog
 money(1000).
 favorite(beer, estrella).
 favorite(pincho, durum).
 ```
-2. Intenciones base: le dice sus preferencias al robot, pide una cerveza (o la va a buscar) y comprueba si está aburrido.
+2. Intenciones base: comunica sus preferencias al robot, pedir una cerveza (o ir a buscarla) y comprobar si está aburrido.
 ```prolog
 !tell_preferences.
 !get(beer).
 !check_bored.
 ```
-3. Para decirle sus preferencias simplemente itera sobre sus propias creencias de favoritos y se las envía al robot.
+3. Para comunicar preferencias al robot simplemente itera sobre sus creencias de favoritos y las envía al robot.
 ```prolog
 +!tell_preferences <- for(favorite(Prod, Pref)) {
 	.send(robot, tell, favorite(Prod, Pref));
 }.
 ```
-4. El Owner utiliza el siguiente plan para entregarle al robot, el dinero que necesita para realizar las compras.
+4. El Owner utiliza el siguiente plan para entregarle al robot dinero para comprar cervezas y tapas.
 ```prolog
 +!ask_money(Ag) : money(X) & X > 0 <- .send(Ag, achieve, save_money(X * 0.5)); -+money(X * 0.5).
 ```
-5. El owner comprueba que tiene la intención de beber, lo que signfica que todavía no ha terminado o que está tirando la lata. Luego, con un 25% de probabilidad va él mismo a buscarla, si no, se la pide al robot.
+5. El Owner comprueba si tiene la intención de beber, lo que significa que todavía no ha terminado o que está tirando la lata. Luego, con un 25% de probabilidad va él mismo a buscarla, si no, se la pide al robot.
 ```prolog
 +!get(beer): .intend(drink(beer)) <- .wait(100); !get(beer).
 +!get(beer): not .intend(get_dish_for_pincho) & not .intend(give(owner,beer)) & .random(Rand) & Rand < 0.25 <-.send(robot,askOne, too_much(owner,beer),A); !get_dish_for_pincho; !give(owner,beer).
 +!get(beer) : true
    <- .send(robot, tell, bring(beer)).
 ```
-6. El owner coge un plato de la alacena para preparar el pincho y coge un pincho, que, en caso de no haga, coge una tapa y prepara los pinchos y en caso de que no haya tapas espera (aunque no debería quedarse sin tapas).
+6. El Owner coge un plato de la alacena para preparar el pincho y coge un pincho, que, en caso de no haber, coge una tapa y prepara los pinchos. En última instancia, si no hay tapas espera a que el StoreKeeper las traiga (aunque no debería quedarse sin tapas).
 ```prolog
 +!get_dish_for_pincho <- !go_to(owner, cupboard); get(dish, cupboard).
 +!get_when_available(pincho): available(fridge, pincho, N) & N > 0 <- true.
@@ -108,7 +107,7 @@ favorite(pincho, durum).
    <- .current_intention(I);
       .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
 ```
-8. Para coger cerveza, ejecuta la acción `get(beer)` y además notifica al robot de cuantas cervezas quedan en la nevera para que el Storekeeper compre más cuando se acaben
+8. Para coger cerveza, ejecuta la acción `get(beer)` y además notifica al robot de cuantas cervezas quedan en la nevera para que el Storekeeper compre más cuando se acaben.
 ```prolog
 +!get_when_available(beer) : available(fridge, beer) & available(fridge, beer, N) <- .wait(100); open(fridge); get(beer); .send(robot, tell, available(fridge, beer, N-1)).
 +!get_when_available(beer) : not available(fridge, beer) <- .wait({ +available(fridge,beer) }); !get_when_available(beer). 
@@ -142,14 +141,48 @@ favorite(pincho, durum).
 ```
 
 #### Supermercado
-Una serie de agentes, que contienen una serie de artículos necesarios en nuestro sistema como las cervezas o las tapas, necesarias para cocinar los pinchos. Cada supermercado contiene un precio distinto para cada artículo, y se distinguen por su nombre. Los supermercados competirán por tener el precio mas bajo para vender artículos al storekeeper. Ésta forma de competición está implementada con una serie de porcentajes, que decrecen el precio de los productos con el tiempo, o lo aumentan cuando se realiza una venta al storekeeper, cabe destacar que el porcentaje de aumento y decrecimiento es distinto para cada supermercado.
-  - Además, contamos con un **Proveedor**  que cuenta con una serie de productos que son comprados por los supermercados, y éstos, deciden por separado que precio ponerle a los productos que compran, para evitar que los supermercados contengan diferentes precios de la misma cerveza, únicamente compran al proveedor cuando se les termina el stock.
+Una serie de agentes, que contienen una serie de artículos necesarios en nuestro sistema como las cervezas o las tapas, necesarias para cocinar los pinchos. Cada supermercado contiene un precio distinto para cada artículo, y se distinguen por su nombre. Los supermercados competirán por tener el precio mas bajo para vender artículos al StoreKeeper. Esta forma de competición está implementada con una serie de porcentajes, que decrecen el precio de los productos con el tiempo, o lo aumentan cuando se realiza una venta, cabe destacar que el porcentaje de aumento y decrecimiento es distinto para cada supermercado.
 
-  1. Se inicializan con valores aleatorios el dinero y el margen de beneficio
-  2. Luego, se consultan los productos ofertados por el proveedor (el entorno)
-  3. Se compran los productos y se añaden como ofertas
+Los parámetros que pueden tener los supermercados son números aleatorios que se actualizan con cierta frecuencia y están limitados en intervalos reducidos.
+
+| Parámetro   | Rango de valores | Período de actualización    |
+| ----------- | ---------------- | --------------------------- |
+| Profit      | [0,1]            | Venta o descuento(cada 20s) |
+| Price rise  | [1.1, 2.1]       | En cada uso                 |
+| Price lower | [0.899, 0.999]   | En cada uso                 |
+
+
+
+Además, contamos con un **Proveedor** que cuenta con una serie de productos que son comprados por los supermercados, y estos, deciden por separado que precio ponerle a los productos que compran, para evitar que los supermercados contengan diferentes precios de la misma cerveza, únicamente compran al proveedor cuando se les termina el stock.
+
+**Tabla de productos**
+
+| Producto | Precio base |
+| -------- | ----------- |
+| Mahou    | 1.0         |
+| Estrella | 1.5         |
+| Skoll    | 0.5         |
+| Tortilla | 2.5         |
+| Durum    | 5.0         |
+| Empanada | 7.0         |
+
+Estos precios son actualizados por el entorno en cada ciclo, resultando en precios con ligeras fluctuaciones constantes.
+
+El cálculo del precio final de un producto es:
+$$
+P_{final} = P_{base} · (1 + Profit)
+$$
+
+
+    1. Se inicializan con valores aleatorios el dinero y el margen de beneficio
+    2. Luego, se consultan los productos ofertados por el proveedor (el entorno)
+    3. Se compran los productos y se añaden como ofertas
+
   ```prolog
-  +!start : true <-
+price_rise(S + 1.1) :- .random(S).
+price_lower(0.999 - S * 0.1) :- .random(S).
+  
++!start : true <-
 		.random(RandProf); +profit(RandProf); // profit_real <- profit + 1
 		.random(M); +money((M + 100) * 1000);
 		.wait(proveedor(_,_));
@@ -201,10 +234,14 @@ Una serie de agentes, que contienen una serie de artículos necesarios en nuestr
 		.send(Ag,tell,stock(Product, Numero_cerves)).
   ```
 
-- **Robot especializados**: el proyecto cuenta con una serie de robots los cuales están  diseñados y programados para realizar unas determinadas tareas en función del estado y características del entorno. Dentro de este grupo encontramos:
+#### Robot especializados
+
+El proyecto cuenta con una serie de robots los cuales están  diseñados y programados para realizar unas determinadas tareas en función del estado y características del entorno.
+
 #### Robot mayordomo
 Robot encargado de recibir la solicitud de cerveza del owner, ir a buscarla a la nevera junto con un pincho y llevársela. También es el encargado de recoger los platos sucios del owner para meterlos en el lavavajillas, y, una vez estén listos, guardarlos en la alacena, y es responsable también de cocinar los pinchos a partir de una tapa y un plato limpio.
 Este robot es el más complejo en su codificación, pues cuenta con una gran multitud de planes para realizar todas las tareas:
+
 1. En este plan, el robot mayordomo solicita al dueño una cantidad de dinero. Posteriormente se actualiza su saldo.
 ```prolog
 !request_money.
@@ -230,11 +267,14 @@ Este robot es el más complejo en su codificación, pues cuenta con una gran mul
 +!myrobot: dishwasher(on) <- !go_to(robot, base_robot); .wait(500); !myrobot.
 +!myrobot: true <- !go_to(robot, base_robot); .wait(500); !myrobot.
 ```
-  1. El primero caso, permite que el robot posea una creencia sobre que existe un plato sucio en el Owner, en caso afirmativo, el robot se dirigirá hacia el sillón para recoger el plato y meterlo en el lavavajillas. Además, si éste llega a su máxima capacidad, comenzará el programa de lavado, que limpiará los platos para posteriormente ser guardados.
-  2. En segundo lugar, se define el caso que permite al robot entregar la cerveza al Owner. El funcionamiento es el siguiente: si el robot detecta que el dueño solicita una cerveza, este se dirigirá a la alacena, donde recogerá un plato que posteriormente utilizará para preparar la ración de acompañamiento. En último lugar se ejecuta el plan `!give(Owner, beer)`.
+3. El primero caso, permite que el robot posea una creencia sobre que existe un plato sucio en el Owner, en caso afirmativo, el robot se dirigirá hacia el sillón para recoger el plato y meterlo en el lavavajillas. Además, si éste llega a su máxima capacidad, comenzará el programa de lavado, que limpiará los platos para posteriormente ser guardados.
 
-  El plan `!give(Owner, beer)` se descompone en tres casos o posibilidades:
-  En el primero, se comprueba que el Owner todavía no haya consumido demasiada cerveza. Posteriormente, el robot se dirige a la nevera, selecciona los productos a servir al dueño y se desplaza hasta el sillón para entregarselos. 
+4. En segundo lugar, se define el caso que permite al robot entregar la cerveza al Owner. El funcionamiento es el siguiente: si el robot detecta que el dueño solicita una cerveza, este se dirigirá a la alacena, donde recogerá un plato que posteriormente utilizará para preparar la ración de acompañamiento. En último lugar se ejecuta el plan `!give(Owner, beer)`.
+
+5. El plan `!give(Owner, beer)` se descompone en tres casos o posibilidades:
+
+​	5.1 En el primero, se comprueba que el Owner todavía no haya consumido demasiada cerveza. Posteriormente, el robot se dirige a la nevera, selecciona los productos a servir al dueño y se desplaza hasta el sillón para entregarselos. 
+
   ```prolog
   +!give(Owner,beer)
    :  not too_much(Owner,beer)
@@ -250,7 +290,8 @@ Este robot es el más complejo en su codificación, pues cuenta con una gran mul
       +consumed(Owner,YY,MM,DD,HH,NN,SS,beer).
   ```
 
-  Si el Owner ha bebido demasiado, entonces el robot mayordomo le informa que ya ha superado el límite e imprime un mensaje por pantalla.
+​	5.2 Si el Owner ha bebido demasiado, entonces el robot mayordomo le informa que ya ha superado el límite e imprime un mensaje por pantalla.
+
   ```prolog
   +!give(Owner,beer)
     :  too_much(Owner,beer) & limit(beer,L)
@@ -259,22 +300,35 @@ Este robot es el más complejo en su codificación, pues cuenta con una gran mul
        .send(Owner,tell,msg(M));
 	     -bring(beer)[source(Owner)].
   ```
-  En caso de que se produzca un conflicto de intenciones, este caso nos los indicará mediante un mensaje por consola:
+​	5.3 En caso de que se produzca un conflicto de intenciones, este caso nos los indicará  	mediante un mensaje por consola:
+
   ```prolog 
   -!give(_,_)
    :  true
    <- .current_intention(I);
       .print("Failed to achieve goal '!has(_,_)'. Current intention is: ",I).
   ```
-  3. Si se da la situación de que el lavavajillas termina, el robot mayordomo ejecutará el plan `!save_plates`, el cual le permite extraer los platos de uno en uno del lavavajillas y guardarlos en la alacena.
-  4. Tras llenar el lavavajillas y que se ponga en funcionamiento, el robot mayordomo volverá a su posición de resposo esperando a que termine el lavado.
-  5. El último caso, envia al robot hasta la zona de descanso y espera ahí hasta recibir una nueva tarea. 
+6. Si se da la situación de que el lavavajillas termina, el robot mayordomo ejecutará el plan `!save_plates`, el cual le permite extraer los platos de uno en uno del lavavajillas y guardarlos en la alacena.
 
+```prolog
++!save_plates : plate(dishwasher, X) & X == 0 <- true.
++!save_plates : plate(dishwasher, X) & X > 0 <-
+	!go_to(robot, dishwasher);
+	get(dish, dishwasher);
+	!go_to(robot, cupboard);
+	put(dish, cupboard);
+	.wait(plate(dishwasher,_));
+	!save_plates.
+```
 
+7. Tras llenar el lavavajillas y que se ponga en funcionamiento, el robot mayordomo volverá a su base a esperar a que termine el lavado.
+
+8. El último caso, envía al robot hasta la zona de descanso y espera ahí hasta recibir una nueva tarea.
 
 #### Cleaner 
-Encargado de recoger los botellines vacíos desperdigados por el entorno que tira el Owner tras beber una cerveza. Éste robot lleva éstos botellines a la papelera.  
+Es el encargado de recoger las latas vacías desperdigadas por el entorno que tira el Owner tras beber una cerveza.  
 Para llevar a cabo está acción se dispone del plan `!clean_trash`:
+
 ```prolog
 !clean_trash.
 +!clean_trash: where(trash, _, _) <- !go_to(cleaner, trash); take(trash); !go_to(cleaner, bin); drop(trash); !clean_trash. 
@@ -296,8 +350,53 @@ Como se puede observar en el código superior, este plan cuenta con dos casos:
 1. Si tiene la creencia de que la papelera está llena, se dirigirá hacia esta localización para vaciarla y quemar toda la basura.
 2. Una terminado el proceso de vaciado, el robot Burner volverá a su posición de descanso donde esperará hasta que la papelera se vuelva a llenar.
 
-#### Storekeeper
+#### StoreKeeper
 Robot encargado de comprar cervezas en el supermercado, y guardarlas en la nevera. Para comprar las cervezas, dictamina el supermercado más barato en el que haya cervezas a momento de la compra, y compra las cervezas, además compra cervezas una vez la cantidad de cervezas almacenadas en la nevera es inferior a 3, haciendo imposible que la nevera se quede vacía.
+
+1. Si quedan pocas cervezas se hace un pedido, para lo que, primero se sitúa en la zona de entregas, actualiza los precios y compara para obtener cuál es el supermercado más barato que oferta la cerveza favorita del Owner.
+
+```prolog
++available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-
+	.print("Stock bajo, se hace pedido");
+	!go_to(storekeeper, delivery);
+	!update_prices; .wait(1000); !calculate_min_prices; ?favorite(beer, Prod);
+	.wait(min_price(Prod,_));
+	?min_price(Prod, S); ?offer(Prod, P, Cantidad)[source(Super)]; ?money(DineroActual);
+	if(DineroActual <=  P) { !request_money };
+	if(Cantidad >= 3) {
+	 .send(Super, achieve, order(Prod,3));
+	} else {
+		.send(Super, achieve, order(Prod,Cantidad));
+		!update_prices;.wait(1000);!calculate_min_prices; .wait(1000);
+		.send(Super, achieve, order(Prod,3 - Cantidad));
+	}.
+```
+
+2.  Cuando llega el pedido inicial, si se tienen 3 cervezas se compran las que faltan en el siguiente supermercado más barato.
+
+```prolog
++delivered(Prod, Cant, OrderId)[source(Super)] : not delivered(_,_,_) & Cant < 3 
+	& offer(Prod, Precio, _)[source(Super)] <-
+	.concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Cant, " unidades e importe ", Precio, " robux", Mensaje);
+  	.send(Super, tell, msg(Mensaje));
+	.send(Super, tell, payment(Prod, Cant, Precio)). 
++delivered(Prod, Cant, OrderId)[source(Super)] : delivered(_,Existente,_) & Cant + Existente < 3
+	& offer(Prod, Precio, _)[source(Super)] <-
+	.concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Cant, " unidades e importe ", Precio, " robux", Mensaje);
+  	.send(Super, tell, msg(Mensaje));
+	.send(Super, tell, payment(Prod, Cant, Precio)).
++delivered(Prod,Qtd,OrderId): min_price(Prod,Super) & offer(Prod, P, _)[source(Super)] & money(M) & M > P
+  <- get(delivery);
+  	.concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Qtd, " unidades e importe ", P, " robux", Mensaje);
+  	.send(Super, tell, msg(Mensaje));
+	.send(Super, tell, payment(Prod, Qtd, P)); 
+	-+money(M - P);
+  	!go_to(storekeeper, fridge);
+  	open(fridge);
+	save(beer);
+	close(fridge);
+	!go_to(storekeeper, base_storekeeper).
+```
 
 
 
