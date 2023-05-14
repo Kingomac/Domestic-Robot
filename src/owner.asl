@@ -20,7 +20,7 @@ favorite(pincho, durum).
 // Darle dinero al robot si se lo pide
 +!ask_money(Ag) : money(X) & X > 0 <- .send(Ag, achieve, save_money(X * 0.5)); -+money(X * 0.5).
 +!get(beer): .intend(drink(beer)) <- .wait(100); !get(beer).
-+!get(beer): not .intend(get_dish_for_pincho) & not .intend(give(owner,beer)) & .random(Rand) & Rand < 0.25 <-.send(robot,askOne, too_much(owner,beer),A); !get_dish_for_pincho; !give(owner,beer).
++!get(beer): not .intend(get_dish_for_pincho) & not .intend(give(owner,beer)) & .random(Rand) & Rand < 0.1 <-.send(robot,askOne, too_much(owner,beer),A); !get_dish_for_pincho; !give(owner,beer).
 +!get(beer) : true
    <- .send(robot, tell, bring(beer)).
 
@@ -59,7 +59,7 @@ favorite(pincho, durum).
    <- !get(beer).
 
 // if I have not beer finish, in other case while I have beer, sip
-+!drink(beer) : not has(owner,beer) & .random(Rand) & Rand < 0.5
++!drink(beer) : not has(owner,beer) & .random(Rand) & Rand < 0.25
    <- .send(robot, tell, plate(dirty)); !go_to(owner, bin); recycle(owner,beer);!go_to(owner,owner).
 +!drink(beer) : not has(owner,beer)
    <- .send(robot, tell, plate(dirty)); drop(beer).

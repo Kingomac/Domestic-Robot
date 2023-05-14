@@ -42,7 +42,7 @@ terminar para llevarle cerveza a otro **/
 	!myrobot.
 +!myrobot: bring(beer)[source(Owner)] <- !get_dish_for_pincho; !give(Owner,beer); !myrobot.
 +!myrobot: dishwasher(finish) <- !save_plates; !myrobot.
-+!myrobot: dishwasher(on) <- !go_to(robot, base_robot); .wait(500); !myrobot.
++!myrobot: dishwasher(on) <- !go_to(robot,base_robot);.wait(500); !go_to(robot, dishwasher); .wait(500); !myrobot.
 +!myrobot: true <- !go_to(robot, base_robot); .wait(500); !myrobot.
 
 +!save_plates : plate(dishwasher, X) & X == 0 <- true.
