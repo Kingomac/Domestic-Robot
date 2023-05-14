@@ -47,10 +47,10 @@ favorite(pincho, durum).
 ```prolog
 +!ask_money(Ag) : money(X) & X > 0 <- .send(Ag, achieve, save_money(X * 0.5)); -+money(X * 0.5).
 ```
-5. El owner comprueba que tiene la intención de beber, lo que signfica que todavía no ha terminado o que está tirando la lata. Luego, con un 25% de probabilidad va él mismo a buscarla, si no, se la pide al robot.
+5. El owner comprueba que tiene la intención de beber, lo que signfica que todavía no ha terminado o que está tirando la lata. Luego, con un 10% de probabilidad va él mismo a buscarla, si no, se la pide al robot.
 ```prolog
 +!get(beer): .intend(drink(beer)) <- .wait(100); !get(beer).
-+!get(beer): not .intend(get_dish_for_pincho) & not .intend(give(owner,beer)) & .random(Rand) & Rand < 0.25 <-.send(robot,askOne, too_much(owner,beer),A); !get_dish_for_pincho; !give(owner,beer).
++!get(beer): not .intend(get_dish_for_pincho) & not .intend(give(owner,beer)) & .random(Rand) & Rand < 0.1 <-.send(robot,askOne, too_much(owner,beer),A); !get_dish_for_pincho; !give(owner,beer).
 +!get(beer) : true
    <- .send(robot, tell, bring(beer)).
 ```
@@ -93,9 +93,9 @@ favorite(pincho, durum).
 -has(owner,beer) : true
    <- !get(beer).
 ```
-10. Cuando acaba la cerveza, hay una posibilidad del 50% de que tire la lata él mismo. Sino simplemente pide otra.
+10. Cuando acaba la cerveza, hay una posibilidad del 25% de que tire la lata él mismo. Sino simplemente pide otra.
 ```prolog
-+!drink(beer) : not has(owner,beer) & .random(Rand) & Rand < 0.5
++!drink(beer) : not has(owner,beer) & .random(Rand) & Rand < 0.25
    <- .send(robot, tell, plate(dirty)); !go_to(owner, bin); recycle(owner,beer);!go_to(owner,owner).
 +!drink(beer) : not has(owner,beer)
    <- .send(robot, tell, plate(dirty)); drop(beer).
@@ -204,7 +204,7 @@ Este robot es el más complejo en su codificación, pues cuenta con una gran mul
 	!myrobot.
 +!myrobot: bring(beer)[source(Owner)] <- !get_dish_for_pincho; !give(Owner,beer); !myrobot.
 +!myrobot: dishwasher(finish) <- !save_plates; !myrobot.  /*El plan !save_plates le permite el robot  guardar los platos en la alacena*/
-+!myrobot: dishwasher(on) <- !go_to(robot, base_robot); .wait(500); !myrobot.
++!myrobot: dishwasher(on) <- !go_to(robot, base_robot); .wait(500); !go_to(robot, dishwasher); .wait(500); !myrobot.
 +!myrobot: true <- !go_to(robot, base_robot); .wait(500); !myrobot.
 ```
   1. El primero caso, permite que el robot posea una creencia sobre que existe un plato sucio en el Owner, en caso afirmativo, el robot se dirigirá hacia el sillón para recoger el plato y meterlo en el lavavajillas. Además, si éste llega a su máxima capacidad, comenzará el programa de lavado, que limpiará los platos para posteriormente ser guardados.
