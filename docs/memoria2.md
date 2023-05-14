@@ -279,6 +279,48 @@ Como se puede observar en el código superior, este plan cuenta con dos casos:
 #### Storekeeper
 Robot encargado de comprar cervezas en el supermercado, y guardarlas en la nevera. Para comprar las cervezas, dictamina el supermercado más barato en el que haya cervezas a momento de la compra, y compra las cervezas, además compra cervezas una vez la cantidad de cervezas almacenadas en la nevera es inferior a 3, haciendo imposible que la nevera se quede vacía.
 
+1. Si quedan pocas cervezas se hace un pedido, para lo que, primero se sitúa en la zona de entregas, actualiza los precios y compara para obtener cuál es el supermercado más barato que oferta la cerveza favorita del Owner.
+```prolog
++available(fridge, beer, X) : at(storekeeper, base_storekeeper) & X <= 2 <-
+   .print("Stock bajo, se hace pedido");
+   !go_to(storekeeper, delivery);
+   !update_prices; .wait(1000); !calculate_min_prices; ?favorite(beer, Prod);
+   .wait(min_price(Prod,_));
+   ?min_price(Prod, S); ?offer(Prod, P, Cantidad)[source(Super)]; ?money(DineroActual);
+   if(DineroActual <=  P) { !request_money };
+   if(Cantidad >= 3) {
+    .send(Super, achieve, order(Prod,3));
+   } else {
+      .send(Super, achieve, order(Prod,Cantidad));
+      !update_prices;.wait(1000);!calculate_min_prices; .wait(1000);
+      .send(Super, achieve, order(Prod,3 - Cantidad));
+   }.
+```
+2.  Cuando llega el pedido inicial, si se tienen 3 cervezas se compran las que faltan en el siguiente supermercado más barato.
+```prolog
++delivered(Prod, Cant, OrderId)[source(Super)] : not delivered(_,_,_) & Cant < 3 
+   & offer(Prod, Precio, _)[source(Super)] <-
+   .concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Cant, " unidades e importe ", Precio, " robux", Mensaje);
+   .send(Super, tell, msg(Mensaje));
+   .send(Super, tell, payment(Prod, Cant, Precio)). 
++delivered(Prod, Cant, OrderId)[source(Super)] : delivered(_,Existente,_) & Cant + Existente < 3
+   & offer(Prod, Precio, _)[source(Super)] <-
+   .concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Cant, " unidades e importe ", Precio, " robux", Mensaje);
+   .send(Super, tell, msg(Mensaje));
+   .send(Super, tell, payment(Prod, Cant, Precio)).
++delivered(Prod,Qtd,OrderId): min_price(Prod,Super) & offer(Prod, P, _)[source(Super)] & money(M) & M > P
+  <- get(delivery);
+   .concat("Pedido de ", Prod,  " recibido con éxito: id ", OrderId, ", ", Qtd, " unidades e importe ", P, " robux", Mensaje);
+   .send(Super, tell, msg(Mensaje));
+   .send(Super, tell, payment(Prod, Qtd, P)); 
+   -+money(M - P);
+   !go_to(storekeeper, fridge);
+   open(fridge);
+   save(beer);
+   close(fridge);
+   !go_to(storekeeper, base_storekeeper).
+```
+
 
 
 
