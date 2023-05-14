@@ -7,7 +7,7 @@ import jason.environment.grid.Location;
  */
 enum Places {
   FRIDGE(new Location(0, 0), HouseModel.FRIDGE),
-  OWNER(new Location(HouseModel.GSize - 1, HouseModel.GSize - 1), HouseModel.OWNER, 1, false, true),
+  OWNER(new Location(HouseModel.GSize - 1, HouseModel.GSize - 1), HouseModel.OWNER, 1, false),
   BIN(new Location(HouseModel.GSize - 1, 0), HouseModel.BIN),
   DELIVERY(new Location(0, HouseModel.GSize - 1), HouseModel.DELIVERY),
   DISHWASHER(new Location(2, 0), HouseModel.DISHWASHER),
@@ -52,15 +52,6 @@ enum Places {
   }
 
   private Places(Location loc, int gridConst, int minDist, boolean canGoThrough) {
-    location = loc;
-    this.gridConst = gridConst;
-    x = loc.x;
-    y = loc.y;
-    this.minDist = minDist;
-    this.canGoThrough = canGoThrough;
-  }
-
-  private Places(Location loc, int gridConst, int minDist, boolean canGoThrough, boolean isOwnerSofa) {
     location = loc;
     this.gridConst = gridConst;
     x = loc.x;

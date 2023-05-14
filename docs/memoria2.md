@@ -2,11 +2,12 @@
 
 > Hecho por:
 > 
-> Javier Veloso Boubeta
+> Mario Vila Comesaña
 > 
 > Cristian Sousa Vidal
 > 
-> Mario Vila Comesaña
+> Javier Veloso Boubeta
+
 
 [TOC]
 
@@ -14,16 +15,17 @@
 
 - **Papelera**: Almacena toda la basura generada por un Owner. Esta cuenta con una capacidad de 5 latas, y una vez que se llene, se vaciará gracias al robot Burner.
 - **Delivery**: En esta zona, el StoreKeeper decide a qué supermercado comprarle los productos. Para decidir en que supermercado se hace la compra, el robot StoreKeeper tiene en cuenta cual es la marca favorita, cual es el precio más barato y si hay suficiente stock de ese producto. Si no hubiese suficiente cantidad, comprará las unidades restantes en otro Supermecado. Una vez recibidos los productos, el robot los recoge y los deposita en la Fridge.
-- **Nevera**: En ésta zona, es donde se guardan tanto las cervezas, como los pinchos y las tapas de las que salen los pinchos, aquí, es donde el MyRobot viene a por las cervezas y pinchos para lleva al Owner y a hacer a partir de las tapas, los pinchos correspondientes, ademá, es aquí donde el storekeeper guarda las cervezas que compra en la zona de deliver
+- **Nevera**: En esta zona, es donde se guardan tanto las cervezas, como los pinchos y las tapas de las que salen los pinchos, aquí, es donde el MyRobot viene a por las cervezas y pinchos para lleva al Owner y a hacer a partir de las tapas, los pinchos correspondientes, ademá, es aquí donde el storekeeper guarda las cervezas que compra en la zona de deliver
 - **Lavavajillas**: Cada vez que el Owner come un pincho, ensucia un plato, así que MyRobot va a por ese plato y lo guarda en el lavavajillas, que, una vez se llene, en nuestro caso con 6 platos, el lavavajillas comenzará a funcionar, y una vez termine, se supone que el lavavajillas habrá terminado.
-- **Alacena**: Agente encargado de almacenar una cantidad de platos limpios, necesarios para la fabricación de los pinchos, éstos platos son los que MyRobot saca del lavavajillas una vez éste termine.
+- **Alacena**: Agente encargado de almacenar una cantidad de platos limpios, necesarios para la fabricación de los pinchos, éstos platos son los que MyRobot saca del lavavajillas una vez este termine.
+- **Obstáculos**: En el entorno, hemos implementado la creación de una serie de muros, generados en un rango determinado, y pueden existir como máximo 9 muros y 7 como mínimo. Estos muros no se pueden generar encima de ningún agente o en ninguna zona de las anteriores, y todos los agentes móviles, los esquivan. 
 
 <img src="foto-grid.png" style="zoom: 50%;" />
 
 ## Agentes
 ### Owner
-Solicita cervezas para consumirlas y posteriormente tira al escenario las latas de cerveza. Estas latas se tiran al entorno de forma aleatoria. Este agente cuenta con una cantidad de dinero de partida, de la cual la mitad es suministrada al robot para que éste realice la compra de cervezas.
-El Owner además, tiene la capacidad de levantarse e ir a la nevera a por la cerveza, ésto sucede de manera aleatoria, haciendo que el robot encargado de ésta tarea no la tenga que hacer.
+Solicita cervezas para consumirlas y posteriormente tira al escenario las latas de cerveza. Estas latas se tiran al entorno de forma aleatoria. Este agente cuenta con una cantidad de dinero de partida, de la cual la mitad es suministrada al robot para que este realice la compra de cervezas.
+El Owner además, tiene la capacidad de levantarse e ir a la nevera a por la cerveza, esto sucede de manera aleatoria, haciendo que el robot encargado de esta tarea no la tenga que hacer.
 
 1. Sus creencias inciales son el dinero que tiene y sus preferencias.
 ```prolog
@@ -115,9 +117,9 @@ favorite(pincho, durum).
 ```
 
 ### Supermercado
-Una serie de agentes, que contienen una serie de artículos necesarios en nuestro sistema como las cervezas o las tapas, necesarias para cocinar los pinchos. Cada supermercado contiene un precio distinto para cada artículo, y se distinguen por su nombre. Los supermercados competirán por tener el precio mas bajo para vender artículos al storekeeper. Ésta forma de competición está implementada con una serie de porcentajes, que decrecen el precio de los productos con el tiempo, o lo aumentan cuando se realiza una venta al storekeeper, cabe destacar que el porcentaje de aumento y decrecimiento es distinto para cada supermercado.
+Una serie de agentes, que contienen una serie de artículos necesarios en nuestro sistema como las cervezas o las tapas, necesarias para cocinar los pinchos. Cada supermercado contiene un precio distinto para cada artículo, y se distinguen por su nombre. Los supermercados competirán por tener el precio mas bajo para vender artículos al storekeeper. Esta forma de competición está implementada con una serie de porcentajes, que decrecen el precio de los productos con el tiempo, o lo aumentan cuando se realiza una venta al storekeeper, cabe destacar que el porcentaje de aumento y decrecimiento es distinto para cada supermercado.
 
-Además, contamos con un **Proveedor**  que cuenta con una serie de productos que son comprados por los supermercados, y éstos, deciden por separado que precio ponerle a los productos que compran, para evitar que los supermercados contengan diferentes precios de la misma cerveza, únicamente compran al proveedor cuando se les termina el stock.
+Además, contamos con un **Proveedor**  que cuenta con una serie de productos que son comprados por los supermercados, y estos, deciden por separado que precio ponerle a los productos que compran, para evitar que los supermercados contengan diferentes precios de la misma cerveza, únicamente compran al proveedor cuando se les termina el stock.
 
   1. Se inicializan con valores aleatorios el dinero y el margen de beneficio
   2. Luego, se consultan los productos ofertados por el proveedor (el entorno)
@@ -207,7 +209,7 @@ Este robot es el más complejo en su codificación, pues cuenta con una gran mul
 +!myrobot: dishwasher(on) <- !go_to(robot, base_robot); .wait(500); !go_to(robot, dishwasher); .wait(500); !myrobot.
 +!myrobot: true <- !go_to(robot, base_robot); .wait(500); !myrobot.
 ```
-  1. El primero caso, permite que el robot posea una creencia sobre que existe un plato sucio en el Owner, en caso afirmativo, el robot se dirigirá hacia el sillón para recoger el plato y meterlo en el lavavajillas. Además, si éste llega a su máxima capacidad, comenzará el programa de lavado, que limpiará los platos para posteriormente ser guardados.
+  1. El primero caso, permite que el robot posea una creencia sobre que existe un plato sucio en el Owner, en caso afirmativo, el robot se dirigirá hacia el sillón para recoger el plato y meterlo en el lavavajillas. Además, si este llega a su máxima capacidad, comenzará el programa de lavado, que limpiará los platos para posteriormente ser guardados.
   2. En segundo lugar, se define el caso que permite al robot entregar la cerveza al Owner. El funcionamiento es el siguiente: si el robot detecta que el dueño solicita una cerveza, este se dirigirá a la alacena, donde recogerá un plato que posteriormente utilizará para preparar la ración de acompañamiento. En último lugar se ejecuta el plan `!give(Owner, beer)`.
 
   El plan `!give(Owner, beer)` se descompone en tres casos o posibilidades:
@@ -251,7 +253,7 @@ Este robot es el más complejo en su codificación, pues cuenta con una gran mul
 
 #### Cleaner 
 
-Encargado de recoger los botellines vacíos desperdigados por el entorno que tira el Owner tras beber una cerveza. Éste robot lleva éstos botellines a la papelera.  
+Encargado de recoger las latas vacías desperdigados por el entorno que tira el Owner tras beber una cerveza. Este robot lleva estas latas a la papelera.  
 Para llevar a cabo está acción se dispone del plan `!clean_trash`:
 ```prolog
 !clean_trash.
@@ -297,8 +299,9 @@ Casos:
 3. No está en el destino, entonces, se calcula la dirección del siguiente movimiento, se mueve el agente una celda en la dirección al destino y se llama de nuevo.
 4. Es el caso de error, se produce cuando no se encuentra un camino, lo que probablemente sea que hay agentes bloqueando el camino, por tanto, espera 3 segundos y lo vuelve a intentar.
 
-Inicializar listas y añadir localización inicial a lista abier
+
 El movimiento se realiza usando el algoritmo A*. En vez de grafos, usamos una matriz que contiene la información necesaria para el algoritmo.
+
 ```java
 private class Celda {
   public int f, h, g;
@@ -384,7 +387,7 @@ El coste $g$ empieza con valor $g=0$ y este se incrementa cada vez que se añade
 
 ### ¿Por qué A*?
 
-Probamos diferentes implementaciones del movimiento, empezando por reglas simples de movimiento inmediato en Jason, Dijkstra usando un grafo que represente el grid y la versión final el algoritmo A*. Finalmente elegimos este algoritmo por su menor complejidad algoritmica, para ilustrarlo vamos a comparar sus complejidades en el peor y en el mejor de los casos para ambos algoritmos, además de la complejidad de construcción del grafo en el caso de Dijkstra y de la matriz en caso de nuestra implementación de A*.
+Probamos diferentes implementaciones del movimiento, empezando por reglas simples de movimiento inmediato en Jason, Dijkstra usando un grafo que represente el grid y en la versión final el algoritmo A\*. Finalmente elegimos este algoritmo por su menor complejidad algorítmica, para ilustrarlo vamos a comparar sus complejidades en el peor y en el mejor de los casos para ambos algoritmos, además de la complejidad de construcción del grafo en el caso de Dijkstra y de la matriz en caso de nuestra implementación de A\*.
 
 - $V$: número de vértices.
 - $E$: número de aristas.
@@ -401,7 +404,7 @@ Probamos diferentes implementaciones del movimiento, empezando por reglas simple
 
 Nuestros agentes móviles usan estas directivas, que usan para llamar a la función `move_robot(Agente,Dirección)` que moverá al agente en la dirección indicada. Esta dirección se obtiene de una función interna de Jason que hemos implementado y se llama con `movement.NextDirection(OrigenX,OrigenY,DestX,DestY,Tipo,Resultado)`, que aplica llama al `Pathfinder` y aplica el algoritmo para unificar dando como resultado la dirección en la que se tiene que mover el agente.
 
-Para hacer una acción interna de Jason Agentspeak tuvimos que reestructurar la parte Java del proyecto para que esté en paquetes distintos del default, de forma que podamos invocarla desde el código Jason. Entonces, dividimos el código Java en dos paquetes, que son las carpetas `house` y `movement`
+Para hacer una acción interna de Jason Agentspeak tuvimos que reestructurar la parte Java del proyecto para que esté en paquetes distintos del default, de forma que podamos invocarla desde el código Jason. Entonces, dividimos el código Java en dos paquetes, que son las carpetas `house` y `movement`.
 
 ## Percepts
 
@@ -548,7 +551,9 @@ public enum MobileAgents {
   private static final Map<String, MobileAgents> STRING_MAP = Arrays.stream(MobileAgents.values())
       .collect(Collectors.toMap(MobileAgents::name, Function.identity()));
 
-  public static MobileAgents from(String x);
+  public static MobileAgents from(String x) {
+      //..
+  }
 
   public static List<String> AGENTS = Arrays.stream(MobileAgents.values()).map(i -> i.agentName).distinct()
       .collect(Collectors.toList());
@@ -591,13 +596,13 @@ enum Places {
   public final boolean canGoThrough;
   public final boolean isOwnerSofa;
 
-  private Places(Location loc);
-  private Places(Location loc, int gridConst);
-  private Places(Location loc, int gridConst, int minDist);
-  private Places(Location loc, int gridConst, int minDist, boolean canGoThrough);
-  private Places(Location loc, int gridConst, int minDist, boolean canGoThrough, boolean isOwnerSofa);
-  public void setLocation(Location loc);
-  public void setLocation(int x, int y);
+  private Places(Location loc) //..
+  private Places(Location loc, int gridConst) //..
+  private Places(Location loc, int gridConst, int minDist) //..
+  private Places(Location loc, int gridConst, int minDist, boolean canGoThrough) //..
+  private Places(Location loc, int gridConst, int minDist, boolean canGoThrough, boolean isOwnerSofa) //..
+  public void setLocation(Location loc) //..
+  public void setLocation(int x, int y) //..
 }
 ```
 Se almacena información sobre su localización, la distancia mínima de interacción, si se puede pasar por encima y si es un sofá de un owner.
@@ -612,7 +617,7 @@ MAS domestic_robot {
     agents: robot;
             owner;
             supermarket_mercadona supermarket.asl [beliefs="name(mercadona)"];
-			      supermarket_lidl supermarket.asl [beliefs="name(lidl)"];
+		   supermarket_lidl supermarket.asl [beliefs="name(lidl)"];
 }
 ```
 2. Añadirlo en la lista de supermercados
@@ -622,4 +627,4 @@ public static final List<String> SUPERMARKETS = List.of("supermarket_mercadona",
 
 ### Entorno
 
-A mayores de todo ésto, hemos cambiado la estructura de los literales, añadiéndolo en un hashmap, que tiene como clave el string del literal, y como valor tiene el propio literal, ésto se realizó para mejorar la lectura del código, ya que las claves son Strings con los que se entiende bien a qué literal hacen referencia. Además, para mejorar la seguridad y no añadir, borrrar o eliminar claves y valores, el hashmap es inmutable.
+A mayores de todo esto, hemos cambiado la estructura de los literales, añadiéndolo en un HashMap, que tiene como clave el String del literal, y como valor tiene el propio literal, esto se realizó para mejorar la lectura del código, ya que las claves son Strings con los que se entiende bien a qué literal hacen referencia. Además, para mejorar la seguridad y no añadir, borrar o eliminar claves y valores, el HashMap es inmutable.
