@@ -53,17 +53,9 @@ public class NextDirection extends DefaultInternalAction {
         toret = MovementDirections.NONE;
         throw new RuntimeException("Next direction is to stay still");
       }
-      // System.out.println("NEXTDIRECTION -> " + toret.name());
       return un.unifies(args[5], new Atom(toret.name().toLowerCase()));
 
-    } /*
-       * catch (IllegalArgumentException e) {
-       * 
-       * } catch(NoValueException e) {
-       * 
-       * }
-       */ catch (Exception e) {
-      System.err.println(e.getMessage());
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return false;

@@ -16,7 +16,7 @@ too_much(Owner, B) :-
 
 /** Le pide dinero a los owners **/
 !request_money.
-+!request_money <- .send(owner, achieve, ask_money(robot)).//; .wait({ +money(_) }); .send(owner_musk, achieve, ask_money(robot)). 
++!request_money <- .send(owner, achieve, ask_money(robot)). 
 +!save_money(Nuevo) <- ?money(Actual); .print("Dinero actual: ", Actual, " que sumado da ", Actual + Nuevo); -+money(Actual + Nuevo).
 
 /** El robot pregunta los precios a los supermercados que le comunicaron su precio al inicio **/
@@ -54,10 +54,7 @@ terminar para llevarle cerveza a otro **/
 	.wait(plate(dishwasher,_));
 	!save_plates.
 
-//+dishwasher(finish) <- !save_plates.
 +!get_dish_for_pincho <- !go_to(robot, cupboard); get(dish, cupboard).
-	
-//+!give(Owner, beer) : dishwasher(finish) <- !save_plates; !give(Owner, beer).
 
 +!get_when_available(pincho): available(fridge, pincho, N) & N > 0 <- true.
 +!get_when_available(pincho): available(fridge, pincho, NP) 
@@ -155,9 +152,6 @@ terminar para llevarle cerveza a otro **/
 		!update_prices;.wait(1000);!calculate_min_prices; .wait(1000);
 		.send(Super, achieve, order(Prod,3 - Cantidad));
 	}.
-	
-/** Gestión si el supermercado tiene menos de 3 cervezas **/
-//+stock(Prod, Num)[source(S)] <- .send(S, achieve, order(Prod, Num)).
 
 /** Burner **/
 !take_out_trash.
